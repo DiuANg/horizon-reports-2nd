@@ -26,6 +26,7 @@ export function clearApiKey() {
 interface FetchOpts {
   country?: string;
   language?: string;
+  category?: string;
   query?: string;
 }
 
