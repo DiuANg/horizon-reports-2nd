@@ -34,6 +34,7 @@ async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArti
   const params = new URLSearchParams();
   if (opts.country) params.set("country", opts.country);
   if (opts.language) params.set("language", opts.language);
+  if (opts.category) params.set("category", opts.category);
   const endpoint = opts.query
     ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(opts.query)}&${params}`
     : `https://api.currentsapi.services/v1/latest-news?${params}`;
