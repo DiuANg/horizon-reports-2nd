@@ -102,6 +102,12 @@ function AuthPage() {
         </div>
 
 
+        {signupSent && mode === "signup" && (
+          <div className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-2 text-xs text-foreground">
+            Check your email (<span className="font-medium">{signupSent}</span>) to confirm your account before signing in.
+          </div>
+        )}
+
         <form onSubmit={submit} className="space-y-3">
           <input
             type="email"
@@ -120,6 +126,17 @@ function AuthPage() {
             placeholder="Password"
             className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
+          {mode === "signin" && (
+            <label className="flex items-center gap-2 text-xs text-muted-foreground select-none cursor-pointer">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-border accent-primary"
+              />
+              Remember me
+            </label>
+          )}
           <button
             type="submit"
             disabled={busy}
