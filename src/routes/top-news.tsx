@@ -20,6 +20,6 @@ export const Route = createFileRoute("/top-news")({
 });
 
 function TopNewsRoute() {
-  const { country, language } = Route.useSearch();
-  return <TopNewsPage initialCountry={country} initialLanguage={language} />;
+  const { country, language, category } = Route.useSearch();
+  return <TopNewsPage initialCountry={country} initialLanguage={language} initialCategory={category} />;
 }
