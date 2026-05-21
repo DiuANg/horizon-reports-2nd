@@ -72,8 +72,8 @@ export function useNewsApi(opts: FetchOpts) {
         }
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Failed to fetch";
-      setError(msg);
+      console.error("News fetch failed:", e);
+      setError("Unable to load news right now. Showing demo data instead.");
       setData(filterMock(opts));
     } finally {
       setLoading(false);
