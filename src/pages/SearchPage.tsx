@@ -43,7 +43,7 @@ export function SearchPage() {
         </button>
       </form>
       <div className="mb-6">
-        <FilterBar country={country} language={language} onCountry={setCountry} onLanguage={setLanguage} />
+        <FilterBar country={country} language={language} category={category} onCountry={setCountry} onLanguage={setLanguage} onCategory={setCategory} />
       </div>
 
       {!query ? (
