@@ -43,7 +43,7 @@ export function SettingsPage() {
     status === "env" ? { text: "Active (env var)", cls: "bg-primary/15 text-primary" }
     : status === "remote" ? { text: "Active (your account)", cls: "bg-primary/15 text-primary" }
     : status === "local" ? { text: "Active (this device)", cls: "bg-primary/15 text-primary" }
-    : { text: "Inactive (using mock data)", cls: "bg-secondary text-muted-foreground" };
+    : { text: "(consider using paid API key from Currents for better experience)", cls: "bg-secondary text-muted-foreground" };
 
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-6">
