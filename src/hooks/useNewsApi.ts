@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { filterMock, MOCK_NEWS } from "@/data/mockNews";
+import { filterMock } from "@/data/mockNews";
 import type { NewsArticle } from "@/types/news";
 import { useApiKey, getEnvApiKey } from "@/hooks/useApiKey";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchNewsServer } from "@/lib/news.functions";
+import { MOCK_NEWS } from "@/data/mockNews";
 
 export type { ApiKeyStatus } from "@/hooks/useApiKey";
 
@@ -48,6 +50,7 @@ export function useNewsApi(opts: FetchOpts) {
   const [data, setData] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [effectiveStatus, setEffectiveStatus] = useState(status);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -56,9 +59,17 @@ export function useNewsApi(opts: FetchOpts) {
       if (key) {
         const res = await fetchFromCurrents(key, opts);
         setData(res.length ? res : filterMock(opts));
+        setEffectiveStatus(status);
       } else {
-        await new Promise((r) => setTimeout(r, 150));
-        setData(filterMock(opts));
+        // Fall back to server-side env CURRENTS_API_KEY
+        const { articles, hasKey } = await fetchNewsServer({ data: opts });
+        if (hasKey) {
+          setData(articles.length ? articles : filterMock(opts));
+          setEffectiveStatus("env");
+        } else {
+          setData(filterMock(opts));
+          setEffectiveStatus("mock");
+        }
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to fetch";
@@ -67,14 +78,14 @@ export function useNewsApi(opts: FetchOpts) {
     } finally {
       setLoading(false);
     }
-  }, [key, opts.country, opts.language, opts.category, opts.query]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [key, status, opts.country, opts.language, opts.category, opts.query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { if (!keyLoading) load(); }, [keyLoading, load]);
 
-  return { data, loading: loading || keyLoading, error, status, reload: load };
+  return { data, loading: loading || keyLoading, error, status: effectiveStatus, reload: load };
 }
 
-/** One-off fetch (used by Globe). Reads key from env or current user. */
+/** One-off fetch (used by Globe). Reads user key first, then env via server fn. */
 export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
   let key = getEnvApiKey();
   if (!key) {
@@ -94,13 +105,19 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
       key = localStorage.getItem("currentsApiKey");
     }
   }
-  if (!key) return filterMock(opts);
-  try {
-    const res = await fetchFromCurrents(key, opts);
-    return res.length ? res : filterMock(opts);
-  } catch {
-    return filterMock(opts);
+  if (key) {
+    try {
+      const res = await fetchFromCurrents(key, opts);
+      return res.length ? res : filterMock(opts);
+    } catch {
+      return filterMock(opts);
+    }
   }
+  try {
+    const { articles, hasKey } = await fetchNewsServer({ data: opts });
+    if (hasKey) return articles.length ? articles : filterMock(opts);
+  } catch { /* ignore */ }
+  return filterMock(opts);
 }
 
 export { MOCK_NEWS };
