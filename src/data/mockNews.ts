@@ -22,10 +22,11 @@ export const MOCK_NEWS: NewsArticle[] = [
   { id: "16", title: "Türkiye'de yeni altyapı projeleri açıklandı", source: "Hürriyet", country: "TR", language: "tr", category: ["business"], published: hoursAgo(16), url: "https://example.com/16", image: null },
 ];
 
-export function filterMock({ country, language, query }: { country?: string; language?: string; query?: string }): NewsArticle[] {
+export function filterMock({ country, language, category, query }: { country?: string; language?: string; category?: string; query?: string }): NewsArticle[] {
   return MOCK_NEWS.filter((a) => {
     if (country && a.country !== country) return false;
     if (language && a.language !== language) return false;
+    if (category && a.category && !a.category.includes(category)) return false;
     if (query) {
       const q = query.toLowerCase();
       const hay = `${a.title} ${a.description ?? ""} ${a.source}`.toLowerCase();
