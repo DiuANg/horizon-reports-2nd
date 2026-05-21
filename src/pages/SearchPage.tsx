@@ -11,7 +11,8 @@ export function SearchPage() {
   const [query, setQuery] = useState<string | undefined>();
   const [country, setCountry] = useState<string | undefined>();
   const [language, setLanguage] = useState<string | undefined>();
-  const { data, loading } = useNewsApi({ query, country, language });
+  const [category, setCategory] = useState<string | undefined>();
+  const { data, loading } = useNewsApi({ query, country, language, category });
   const bm = useBookmarks();
 
   const submit = (e: FormEvent) => {
@@ -42,7 +43,7 @@ export function SearchPage() {
         </button>
       </form>
       <div className="mb-6">
-        <FilterBar country={country} language={language} onCountry={setCountry} onLanguage={setLanguage} />
+        <FilterBar country={country} language={language} category={category} onCountry={setCountry} onLanguage={setLanguage} onCategory={setCategory} />
       </div>
 
       {!query ? (

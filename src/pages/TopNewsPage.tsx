@@ -8,12 +8,14 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 interface Props {
   initialCountry?: string;
   initialLanguage?: string;
+  initialCategory?: string;
 }
 
-export function TopNewsPage({ initialCountry, initialLanguage }: Props) {
+export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }: Props) {
   const [country, setCountry] = useState<string | undefined>(initialCountry);
   const [language, setLanguage] = useState<string | undefined>(initialLanguage ?? "en");
-  const { data, loading, status, error } = useNewsApi({ country, language });
+  const [category, setCategory] = useState<string | undefined>(initialCategory);
+  const { data, loading, status, error } = useNewsApi({ country, language, category });
   const bm = useBookmarks();
 
   return (
@@ -25,7 +27,7 @@ export function TopNewsPage({ initialCountry, initialLanguage }: Props) {
             {status === "mock" ? "Showing demo data — add a Currents API key in Settings for live news." : "Latest headlines from around the world."}
           </p>
         </div>
-        <FilterBar country={country} language={language} onCountry={setCountry} onLanguage={setLanguage} />
+        <FilterBar country={country} language={language} category={category} onCountry={setCountry} onLanguage={setLanguage} onCategory={setCategory} />
       </div>
       {error && <p className="text-sm text-destructive mb-4">{error}</p>}
       {loading ? (

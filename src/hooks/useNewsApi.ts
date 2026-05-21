@@ -26,6 +26,7 @@ export function clearApiKey() {
 interface FetchOpts {
   country?: string;
   language?: string;
+  category?: string;
   query?: string;
 }
 
@@ -33,6 +34,7 @@ async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArti
   const params = new URLSearchParams();
   if (opts.country) params.set("country", opts.country);
   if (opts.language) params.set("language", opts.language);
+  if (opts.category) params.set("category", opts.category);
   const endpoint = opts.query
     ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(opts.query)}&${params}`
     : `https://api.currentsapi.services/v1/latest-news?${params}`;
@@ -84,7 +86,7 @@ export function useNewsApi(opts: FetchOpts) {
     } finally {
       setLoading(false);
     }
-  }, [opts.country, opts.language, opts.query]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [opts.country, opts.language, opts.category, opts.query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { load(); }, [load]);
 
@@ -103,3 +105,5 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
 }
 
 export { MOCK_NEWS };
+
+// Update filterMock signature in mockNews.ts to accept category
