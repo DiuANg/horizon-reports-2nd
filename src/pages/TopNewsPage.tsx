@@ -27,7 +27,7 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
             {status === "mock" ? "Showing demo data — add a Currents API key in Settings for live news." : "Latest headlines from around the world."}
           </p>
         </div>
-        <FilterBar country={country} language={language} onCountry={setCountry} onLanguage={setLanguage} />
+        <FilterBar country={country} language={language} category={category} onCountry={setCountry} onLanguage={setLanguage} onCategory={setCategory} />
       </div>
       {error && <p className="text-sm text-destructive mb-4">{error}</p>}
       {loading ? (
