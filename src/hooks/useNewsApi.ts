@@ -105,3 +105,5 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
 }
 
 export { MOCK_NEWS };
+
+// Update filterMock signature in mockNews.ts to accept category
