@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Globe2, Newspaper, Search, Settings, Bookmark, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { UserMenu } from "@/components/UserMenu";
 
 const NAV = [
   { to: "/", label: "Globe", icon: Globe2 },
@@ -34,12 +35,12 @@ export function Sidebar() {
       <aside
         className={`${
           open ? "block" : "hidden"
-        } md:block md:sticky md:top-0 md:h-screen w-full md:w-60 shrink-0 bg-surface border-r border-border z-30`}
+        } md:flex md:flex-col md:sticky md:top-0 md:h-screen w-full md:w-60 shrink-0 bg-surface border-r border-border z-30`}
       >
         <div className="hidden md:flex items-center gap-2 px-5 py-5 text-primary font-semibold text-lg">
           <Globe2 className="w-5 h-5" /> World News
         </div>
-        <nav className="flex flex-col gap-1 p-3">
+        <nav className="flex flex-col gap-1 p-3 flex-1">
           {NAV.map(({ to, label, icon: Icon }) => {
             const active = pathname === to;
             return (
@@ -59,6 +60,9 @@ export function Sidebar() {
             );
           })}
         </nav>
+        <div className="border-t border-border p-2">
+          <UserMenu />
+        </div>
       </aside>
     </>
   );

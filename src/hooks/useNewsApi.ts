@@ -1,27 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { filterMock, MOCK_NEWS } from "@/data/mockNews";
 import type { NewsArticle } from "@/types/news";
+import { useApiKey, getEnvApiKey } from "@/hooks/useApiKey";
+import { supabase } from "@/integrations/supabase/client";
 
-const STORAGE_KEY = "currentsApiKey";
-
-export type ApiKeyStatus = "env" | "local" | "mock";
-
-export function getApiKey(): { key: string | null; status: ApiKeyStatus } {
-  const envKey = (import.meta.env.VITE_CURRENTS_API_KEY as string | undefined) || null;
-  if (envKey) return { key: envKey, status: "env" };
-  if (typeof window !== "undefined") {
-    const local = localStorage.getItem(STORAGE_KEY);
-    if (local) return { key: local, status: "local" };
-  }
-  return { key: null, status: "mock" };
-}
-
-export function saveApiKey(key: string) {
-  localStorage.setItem(STORAGE_KEY, key.trim());
-}
-export function clearApiKey() {
-  localStorage.removeItem(STORAGE_KEY);
-}
+export type { ApiKeyStatus } from "@/hooks/useApiKey";
 
 interface FetchOpts {
   country?: string;
@@ -61,22 +44,20 @@ async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArti
 }
 
 export function useNewsApi(opts: FetchOpts) {
+  const { key, status, loading: keyLoading } = useApiKey();
   const [data, setData] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<ApiKeyStatus>("mock");
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const { key, status } = getApiKey();
-    setStatus(status);
     try {
       if (key) {
         const res = await fetchFromCurrents(key, opts);
         setData(res.length ? res : filterMock(opts));
       } else {
-        await new Promise((r) => setTimeout(r, 250));
+        await new Promise((r) => setTimeout(r, 150));
         setData(filterMock(opts));
       }
     } catch (e) {
@@ -86,15 +67,33 @@ export function useNewsApi(opts: FetchOpts) {
     } finally {
       setLoading(false);
     }
-  }, [opts.country, opts.language, opts.category, opts.query]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [key, opts.country, opts.language, opts.category, opts.query]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (!keyLoading) load(); }, [keyLoading, load]);
 
-  return { data, loading, error, status, reload: load };
+  return { data, loading: loading || keyLoading, error, status, reload: load };
 }
 
+/** One-off fetch (used by Globe). Reads key from env or current user. */
 export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
-  const { key } = getApiKey();
+  let key = getEnvApiKey();
+  if (!key) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("user_api_keys")
+          .select("api_key")
+          .eq("user_id", user.id)
+          .eq("provider", "currents")
+          .maybeSingle();
+        key = data?.api_key ?? null;
+      }
+    } catch { /* ignore */ }
+    if (!key && typeof window !== "undefined") {
+      key = localStorage.getItem("currentsApiKey");
+    }
+  }
   if (!key) return filterMock(opts);
   try {
     const res = await fetchFromCurrents(key, opts);
@@ -105,5 +104,3 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
 }
 
 export { MOCK_NEWS };
-
-// Update filterMock signature in mockNews.ts to accept category
