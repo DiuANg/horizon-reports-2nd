@@ -8,12 +8,14 @@ import { useBookmarks } from "@/hooks/useBookmarks";
 interface Props {
   initialCountry?: string;
   initialLanguage?: string;
+  initialCategory?: string;
 }
 
-export function TopNewsPage({ initialCountry, initialLanguage }: Props) {
+export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }: Props) {
   const [country, setCountry] = useState<string | undefined>(initialCountry);
   const [language, setLanguage] = useState<string | undefined>(initialLanguage ?? "en");
-  const { data, loading, status, error } = useNewsApi({ country, language });
+  const [category, setCategory] = useState<string | undefined>(initialCategory);
+  const { data, loading, status, error } = useNewsApi({ country, language, category });
   const bm = useBookmarks();
 
   return (
