@@ -13,7 +13,7 @@ export const Route = createFileRoute("/top-news")({
   head: () => ({
     meta: [
       { title: "Top News — World News Dashboard" },
-      { name: "description", content: "The latest top headlines from across the world, filtered by country and language." },
+      { name: "description", content: "The latest top headlines from across the world, filtered by country, language, and category." },
     ],
   }),
   component: TopNewsRoute,
