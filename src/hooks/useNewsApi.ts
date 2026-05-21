@@ -86,7 +86,7 @@ export function useNewsApi(opts: FetchOpts) {
     } finally {
       setLoading(false);
     }
-  }, [opts.country, opts.language, opts.query]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [opts.country, opts.language, opts.category, opts.query]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { load(); }, [load]);
 
