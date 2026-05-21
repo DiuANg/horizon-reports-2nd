@@ -1,26 +1,32 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { Spinner } from "@/components/LoadingState";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Interactive Globe — World News Dashboard" },
+      { name: "description", content: "Spin the globe and click any country to read its latest news." },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  const [mounted, setMounted] = useState(false);
+  const [Comp, setComp] = useState<React.ComponentType | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    import("@/pages/GlobePage").then((m) => setComp(() => m.GlobePage));
+  }, []);
+
+  if (!mounted || !Comp) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <Spinner label="Loading globe..." />
+      </div>
+    );
+  }
+  return <Comp />;
 }
