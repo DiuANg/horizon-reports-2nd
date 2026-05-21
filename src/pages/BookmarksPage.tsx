@@ -1,10 +1,28 @@
+import { Link } from "@tanstack/react-router";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { useAuth } from "@/hooks/useAuth";
 import { Spinner } from "@/components/LoadingState";
 import { NewsCard } from "@/components/NewsCard";
-import { Bookmark } from "lucide-react";
+import { Bookmark, Lock } from "lucide-react";
 
 export function BookmarksPage() {
+  const { user, loading: authLoading } = useAuth();
   const bm = useBookmarks();
+
+  if (authLoading) return <div className="p-8"><Spinner /></div>;
+
+  if (!user) {
+    return (
+      <div className="p-8 max-w-md mx-auto text-center mt-20">
+        <Lock className="w-10 h-10 mx-auto mb-3 text-primary opacity-60" />
+        <h1 className="text-xl font-bold mb-2">Sign in required</h1>
+        <p className="text-sm text-muted-foreground mb-5">Sign in to view and manage your bookmarks across devices.</p>
+        <Link to="/auth" className="inline-flex px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+          Sign in
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">

@@ -1,18 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import type { NewsArticle } from "@/types/news";
-
-const SESSION_KEY = "wn_session_id";
-
-function getSessionId(): string {
-  if (typeof window === "undefined") return "ssr";
-  let id = localStorage.getItem(SESSION_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(SESSION_KEY, id);
-  }
-  return id;
-}
 
 export interface Bookmark {
   id: string;
@@ -26,20 +16,22 @@ export interface Bookmark {
 }
 
 export function useBookmarks() {
+  const { user } = useAuth();
+  const userId = user?.id;
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
-  const sessionId = typeof window !== "undefined" ? getSessionId() : "ssr";
 
   const refresh = useCallback(async () => {
+    if (!userId) { setBookmarks([]); setLoading(false); return; }
     setLoading(true);
     const { data } = await supabase
       .from("bookmarks")
       .select("id, article_url, title, source, country, language, image_url, created_at")
-      .eq("user_session_id", sessionId)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false });
     setBookmarks((data ?? []) as Bookmark[]);
     setLoading(false);
-  }, [sessionId]);
+  }, [userId]);
 
   useEffect(() => { refresh(); }, [refresh]);
 
@@ -48,10 +40,19 @@ export function useBookmarks() {
     [bookmarks]
   );
 
+  const requireAuth = () => {
+    if (!userId) {
+      toast.error("Sign in to save bookmarks");
+      return false;
+    }
+    return true;
+  };
+
   const add = useCallback(
     async (a: NewsArticle) => {
+      if (!requireAuth()) return;
       await supabase.from("bookmarks").insert({
-        user_session_id: sessionId,
+        user_id: userId!,
         article_url: a.url,
         title: a.title,
         source: a.source,
@@ -61,19 +62,20 @@ export function useBookmarks() {
       });
       await refresh();
     },
-    [sessionId, refresh]
+    [userId, refresh]
   );
 
   const remove = useCallback(
     async (url: string) => {
+      if (!userId) return;
       await supabase
         .from("bookmarks")
         .delete()
-        .eq("user_session_id", sessionId)
+        .eq("user_id", userId)
         .eq("article_url", url);
       await refresh();
     },
-    [sessionId, refresh]
+    [userId, refresh]
   );
 
   const toggle = useCallback(
@@ -85,9 +87,10 @@ export function useBookmarks() {
   );
 
   const clearAll = useCallback(async () => {
-    await supabase.from("bookmarks").delete().eq("user_session_id", sessionId);
+    if (!userId) return;
+    await supabase.from("bookmarks").delete().eq("user_id", userId);
     await refresh();
-  }, [sessionId, refresh]);
+  }, [userId, refresh]);
 
-  return { bookmarks, loading, isBookmarked, add, remove, toggle, clearAll, refresh, sessionId };
+  return { bookmarks, loading, isBookmarked, add, remove, toggle, clearAll, refresh, isAuthed: !!userId };
 }
