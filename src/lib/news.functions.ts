@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { NewsArticle } from "@/types/news";
 
 interface FetchOpts {
@@ -7,6 +8,10 @@ interface FetchOpts {
   category?: string;
   query?: string;
 }
+
+const ALLOWED_COUNTRY = /^[A-Za-z]{2}$/;
+const ALLOWED_LANGUAGE = /^[A-Za-z]{2}$/;
+const ALLOWED_CATEGORY = /^[a-zA-Z_-]{1,32}$/;
 
 function mapItems(json: any, country?: string): NewsArticle[] {
   const items = (json?.news ?? []) as Array<{
@@ -28,8 +33,30 @@ function mapItems(json: any, country?: string): NewsArticle[] {
   }));
 }
 
+function validate(input: FetchOpts): FetchOpts {
+  const out: FetchOpts = {};
+  if (input.country) {
+    if (!ALLOWED_COUNTRY.test(input.country)) throw new Error("Invalid country");
+    out.country = input.country;
+  }
+  if (input.language) {
+    if (!ALLOWED_LANGUAGE.test(input.language)) throw new Error("Invalid language");
+    out.language = input.language;
+  }
+  if (input.category) {
+    if (!ALLOWED_CATEGORY.test(input.category)) throw new Error("Invalid category");
+    out.category = input.category;
+  }
+  if (input.query) {
+    if (typeof input.query !== "string" || input.query.length > 200) throw new Error("Invalid query");
+    out.query = input.query;
+  }
+  return out;
+}
+
 export const fetchNewsServer = createServerFn({ method: "POST" })
-  .inputValidator((input: FetchOpts) => input)
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: FetchOpts) => validate(input))
   .handler(async ({ data }) => {
     const key = process.env.CURRENTS_API_KEY;
     if (!key) return { articles: [] as NewsArticle[], hasKey: false };
