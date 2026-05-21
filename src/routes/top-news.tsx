@@ -5,6 +5,7 @@ import { TopNewsPage } from "@/pages/TopNewsPage";
 const searchSchema = z.object({
   country: z.string().optional(),
   language: z.string().optional(),
+  category: z.string().optional(),
 });
 
 export const Route = createFileRoute("/top-news")({
