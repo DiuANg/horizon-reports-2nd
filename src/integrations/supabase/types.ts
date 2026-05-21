@@ -24,7 +24,7 @@ export type Database = {
           language: string | null
           source: string
           title: string
-          user_session_id: string
+          user_id: string
         }
         Insert: {
           article_url: string
@@ -35,7 +35,7 @@ export type Database = {
           language?: string | null
           source: string
           title: string
-          user_session_id: string
+          user_id: string
         }
         Update: {
           article_url?: string
@@ -46,7 +46,61 @@ export type Database = {
           language?: string | null
           source?: string
           title?: string
-          user_session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_api_keys: {
+        Row: {
+          api_key: string
+          created_at: string
+          id: string
+          provider: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          api_key: string
+          created_at?: string
+          id?: string
+          provider: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          api_key?: string
+          created_at?: string
+          id?: string
+          provider?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
