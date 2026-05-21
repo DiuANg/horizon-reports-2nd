@@ -54,20 +54,6 @@ function AuthPage() {
     }
   };
 
-  const google = async () => {
-    setBusy(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${window.location.origin}/` },
-      });
-      if (error) throw error;
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
-      setBusy(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <div className="w-full max-w-sm bg-card border border-border rounded-2xl p-6 space-y-5">
@@ -88,17 +74,6 @@ function AuthPage() {
           ))}
         </div>
 
-        <button
-          onClick={google}
-          disabled={busy}
-          className="w-full py-2 rounded-lg border border-border bg-surface hover:bg-secondary text-sm font-medium transition-colors disabled:opacity-50"
-        >
-          Continue with Google
-        </button>
-
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <div className="flex-1 h-px bg-border" /> or <div className="flex-1 h-px bg-border" />
-        </div>
 
         <form onSubmit={submit} className="space-y-3">
           <input
