@@ -19,7 +19,9 @@ function AuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [signupSent, setSignupSent] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -31,21 +33,46 @@ function AuthPage() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  // Move Supabase session from localStorage to sessionStorage when "remember me" is off,
+  // so the session is cleared when the browser/tab closes.
+  const applyRememberPreference = () => {
+    if (remember || typeof window === "undefined") return;
+    try {
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("sb-") && k.endsWith("-auth-token")) {
+          const v = localStorage.getItem(k);
+          if (v) sessionStorage.setItem(k, v);
+          localStorage.removeItem(k);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: `${window.location.origin}/` },
         });
         if (error) throw error;
-        toast.success("Account created");
+        if (!data.session) {
+          setSignupSent(email);
+          toast.success("Check your email to confirm your account");
+        } else {
+          applyRememberPreference();
+          toast.success("Account created");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        applyRememberPreference();
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Auth failed");
