@@ -28,7 +28,7 @@ export function FilterBar({
   const { today, oneMonthAgo } = useMemo(() => {
     const now = new Date();
     const past = new Date();
-    past.setDate(past.getDate() - 30);
+    past.setDate(past.getDate() - 15);
     return { today: toYMD(now), oneMonthAgo: toYMD(past) };
   }, []);
 
