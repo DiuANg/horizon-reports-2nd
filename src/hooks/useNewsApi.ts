@@ -13,6 +13,8 @@ interface FetchOpts {
   language?: string;
   category?: string;
   query?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArticle[]> {
@@ -20,6 +22,8 @@ async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArti
   if (opts.country) params.set("country", opts.country);
   if (opts.language) params.set("language", opts.language);
   if (opts.category) params.set("category", opts.category);
+  if (opts.startDate) params.set("start_date", `${opts.startDate}T00:00:00+00:00`);
+  if (opts.endDate) params.set("end_date", `${opts.endDate}T23:59:59+00:00`);
   const endpoint = opts.query
     ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(opts.query)}&${params}`
     : `https://api.currentsapi.services/v1/latest-news?${params}`;
