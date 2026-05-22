@@ -17,25 +17,43 @@ interface FetchOpts {
   endDate?: string;
 }
 
+interface CurrentsNewsItem {
+  id: string;
+  title: string;
+  description?: string;
+  url: string;
+  author?: string;
+  image?: string | null;
+  language?: string;
+  category?: string[];
+  published: string;
+}
+
+function startOfDayUtc(date: string): string {
+  return `${date}T00:00:00.000+00:00`;
+}
+
+function endOfDayUtc(date: string): string {
+  return `${date}T23:59:59.000+00:00`;
+}
+
 async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArticle[]> {
   const params = new URLSearchParams();
   if (opts.country) params.set("country", opts.country);
   if (opts.language) params.set("language", opts.language);
   if (opts.category) params.set("category", opts.category);
-  if (opts.startDate) params.set("start_date", `${opts.startDate}T00:00:00+00:00`);
-  if (opts.endDate) params.set("end_date", `${opts.endDate}T23:59:59+00:00`);
+  if (opts.startDate) params.set("start_date", startOfDayUtc(opts.startDate));
+  if (opts.endDate) params.set("end_date", endOfDayUtc(opts.endDate));
   const hasDates = !!(opts.startDate || opts.endDate);
   const useSearch = !!opts.query || hasDates;
+  if (useSearch) params.set("keywords", opts.query?.trim() || "*");
   const endpoint = useSearch
-    ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(opts.query ?? "*")}&${params}`
-    : `https://api.currentsapi.services/v1/latest-news?${params}`;
+    ? `https://api.currentsapi.services/v2/search?${params}`
+    : `https://api.currentsapi.services/v2/latest-news?${params}`;
   const res = await fetch(endpoint, { headers: { Authorization: key } });
   if (!res.ok) throw new Error(`Currents API error ${res.status}`);
   const json = await res.json();
-  const items = (json.news ?? []) as Array<{
-    id: string; title: string; description?: string; url: string; author?: string;
-    image?: string | null; language?: string; category?: string[]; published: string;
-  }>;
+  const items = (json.news ?? []) as CurrentsNewsItem[];
   return items.map((n) => ({
     id: n.id,
     title: n.title,
@@ -46,12 +64,19 @@ async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArti
     language: n.language,
     category: n.category,
     published: n.published,
-    source: (() => { try { return new URL(n.url).hostname.replace(/^www\./, ""); } catch { return n.author ?? "Unknown"; } })(),
+    source: (() => {
+      try {
+        return new URL(n.url).hostname.replace(/^www\./, "");
+      } catch {
+        return n.author ?? "Unknown";
+      }
+    })(),
     country: opts.country,
   }));
 }
 
 export function useNewsApi(opts: FetchOpts) {
+  const { country, language, category, query, startDate, endDate } = opts;
   const { key, status, loading: keyLoading } = useApiKey();
   const [data, setData] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,34 +84,37 @@ export function useNewsApi(opts: FetchOpts) {
   const [effectiveStatus, setEffectiveStatus] = useState(status);
 
   const load = useCallback(async () => {
+    const requestOpts = { country, language, category, query, startDate, endDate };
     setLoading(true);
     setError(null);
     try {
       if (key) {
-        const res = await fetchFromCurrents(key, opts);
-        setData(res.length ? res : filterMock(opts));
+        const res = await fetchFromCurrents(key, requestOpts);
+        setData(res.length ? res : filterMock(requestOpts));
         setEffectiveStatus(status);
       } else {
         // Fall back to server-side env CURRENTS_API_KEY
-        const { articles, hasKey } = await fetchNewsServer({ data: opts });
+        const { articles, hasKey } = await fetchNewsServer({ data: requestOpts });
         if (hasKey) {
-          setData(articles.length ? articles : filterMock(opts));
+          setData(articles.length ? articles : filterMock(requestOpts));
           setEffectiveStatus("env");
         } else {
-          setData(filterMock(opts));
+          setData(filterMock(requestOpts));
           setEffectiveStatus("mock");
         }
       }
     } catch (e) {
       console.error("News fetch failed:", e);
       setError("Unable to load news right now. Showing demo data instead.");
-      setData(filterMock(opts));
+      setData(filterMock(requestOpts));
     } finally {
       setLoading(false);
     }
-  }, [key, status, opts.country, opts.language, opts.category, opts.query, opts.startDate, opts.endDate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [key, status, country, language, category, query, startDate, endDate]);
 
-  useEffect(() => { if (!keyLoading) load(); }, [keyLoading, load]);
+  useEffect(() => {
+    if (!keyLoading) load();
+  }, [keyLoading, load]);
 
   return { data, loading: loading || keyLoading, error, status: effectiveStatus, reload: load };
 }
@@ -96,7 +124,9 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
   let key = getEnvApiKey();
   if (!key) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase
           .from("user_api_keys")
@@ -106,7 +136,9 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
           .maybeSingle();
         key = data?.api_key ?? null;
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     if (!key && typeof window !== "undefined") {
       key = localStorage.getItem("currentsApiKey");
     }
@@ -122,7 +154,9 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
   try {
     const { articles, hasKey } = await fetchNewsServer({ data: opts });
     if (hasKey) return articles.length ? articles : filterMock(opts);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return filterMock(opts);
 }
 
