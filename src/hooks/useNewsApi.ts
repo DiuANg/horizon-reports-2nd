@@ -76,6 +76,7 @@ async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArti
 }
 
 export function useNewsApi(opts: FetchOpts) {
+  const { country, language, category, query, startDate, endDate } = opts;
   const { key, status, loading: keyLoading } = useApiKey();
   const [data, setData] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,41 +84,42 @@ export function useNewsApi(opts: FetchOpts) {
   const [effectiveStatus, setEffectiveStatus] = useState(status);
 
   const load = useCallback(async () => {
+    const requestOpts = { country, language, category, query, startDate, endDate };
     setLoading(true);
     setError(null);
     try {
       if (key) {
-        const res = await fetchFromCurrents(key, opts);
-        setData(res.length ? res : filterMock(opts));
+        const res = await fetchFromCurrents(key, requestOpts);
+        setData(res.length ? res : filterMock(requestOpts));
         setEffectiveStatus(status);
       } else {
         // Fall back to server-side env CURRENTS_API_KEY
-        const { articles, hasKey } = await fetchNewsServer({ data: opts });
+        const { articles, hasKey } = await fetchNewsServer({ data: requestOpts });
         if (hasKey) {
-          setData(articles.length ? articles : filterMock(opts));
+          setData(articles.length ? articles : filterMock(requestOpts));
           setEffectiveStatus("env");
         } else {
-          setData(filterMock(opts));
+          setData(filterMock(requestOpts));
           setEffectiveStatus("mock");
         }
       }
     } catch (e) {
       console.error("News fetch failed:", e);
       setError("Unable to load news right now. Showing demo data instead.");
-      setData(filterMock(opts));
+      setData(filterMock(requestOpts));
     } finally {
       setLoading(false);
     }
   }, [
     key,
     status,
-    opts.country,
-    opts.language,
-    opts.category,
-    opts.query,
-    opts.startDate,
-    opts.endDate,
-  ]); // eslint-disable-line react-hooks/exhaustive-deps
+    country,
+    language,
+    category,
+    query,
+    startDate,
+    endDate,
+  ]);
 
   useEffect(() => {
     if (!keyLoading) load();
