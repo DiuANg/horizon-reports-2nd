@@ -123,7 +123,7 @@ export const fetchNewsServer = createServerFn({ method: "POST" })
     if (data.endDate) params.set("end_date", endOfDayUtc(data.endDate));
     const hasDates = !!(data.startDate || data.endDate);
     const useSearch = !!data.query || hasDates;
-    if (useSearch) params.set("keywords", data.query?.trim() || "*");
+    if (useSearch) params.set("keywords", data.query?.trim() || "news");
     const endpoint = useSearch
       ? `https://api.currentsapi.services/v2/search?${params}`
       : `https://api.currentsapi.services/v2/latest-news?${params}`;
