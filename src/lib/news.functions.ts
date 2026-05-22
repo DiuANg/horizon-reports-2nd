@@ -15,6 +15,14 @@ const ALLOWED_LANGUAGE = /^[A-Za-z]{2}$/;
 const ALLOWED_CATEGORY = /^[a-zA-Z_-]{1,32}$/;
 const ALLOWED_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+function startOfDayUtc(date: string): string {
+  return `${date}T00:00:00.000+00:00`;
+}
+
+function endOfDayUtc(date: string): string {
+  return `${date}T23:59:59.000+00:00`;
+}
+
 function mapItems(json: any, country?: string): NewsArticle[] {
   const items = (json?.news ?? []) as Array<{
     id: string; title: string; description?: string; url: string; author?: string;
@@ -84,15 +92,19 @@ export const fetchNewsServer = createServerFn({ method: "POST" })
     if (data.country) params.set("country", data.country);
     if (data.language) params.set("language", data.language);
     if (data.category) params.set("category", data.category);
-    if (data.startDate) params.set("start_date", `${data.startDate}T00:00:00+00:00`);
-    if (data.endDate) params.set("end_date", `${data.endDate}T23:59:59+00:00`);
+    if (data.startDate) params.set("start_date", startOfDayUtc(data.startDate));
+    if (data.endDate) params.set("end_date", endOfDayUtc(data.endDate));
     const hasDates = !!(data.startDate || data.endDate);
     const useSearch = !!data.query || hasDates;
+    if (useSearch) params.set("keywords", data.query?.trim() || "*");
     const endpoint = useSearch
-      ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(data.query ?? "*")}&${params}`
-      : `https://api.currentsapi.services/v1/latest-news?${params}`;
+      ? `https://api.currentsapi.services/v2/search?${params}`
+      : `https://api.currentsapi.services/v2/latest-news?${params}`;
     const res = await fetch(endpoint, { headers: { Authorization: key } });
-    if (!res.ok) throw new Error(`Currents API error ${res.status}`);
+    if (!res.ok) {
+      console.error("Currents API request failed", { status: res.status, body: await res.text() });
+      return { articles: [] as NewsArticle[], hasKey: true };
+    }
     const json = await res.json();
     return { articles: mapItems(json, data.country), hasKey: true };
   });
