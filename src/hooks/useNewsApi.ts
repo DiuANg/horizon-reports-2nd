@@ -17,6 +17,18 @@ interface FetchOpts {
   endDate?: string;
 }
 
+interface CurrentsNewsItem {
+  id: string;
+  title: string;
+  description?: string;
+  url: string;
+  author?: string;
+  image?: string | null;
+  language?: string;
+  category?: string[];
+  published: string;
+}
+
 function startOfDayUtc(date: string): string {
   return `${date}T00:00:00.000+00:00`;
 }
@@ -41,10 +53,7 @@ async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArti
   const res = await fetch(endpoint, { headers: { Authorization: key } });
   if (!res.ok) throw new Error(`Currents API error ${res.status}`);
   const json = await res.json();
-  const items = (json.news ?? []) as Array<{
-    id: string; title: string; description?: string; url: string; author?: string;
-    image?: string | null; language?: string; category?: string[]; published: string;
-  }>;
+  const items = (json.news ?? []) as CurrentsNewsItem[];
   return items.map((n) => ({
     id: n.id,
     title: n.title,
@@ -55,7 +64,13 @@ async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArti
     language: n.language,
     category: n.category,
     published: n.published,
-    source: (() => { try { return new URL(n.url).hostname.replace(/^www\./, ""); } catch { return n.author ?? "Unknown"; } })(),
+    source: (() => {
+      try {
+        return new URL(n.url).hostname.replace(/^www\./, "");
+      } catch {
+        return n.author ?? "Unknown";
+      }
+    })(),
     country: opts.country,
   }));
 }
@@ -93,9 +108,20 @@ export function useNewsApi(opts: FetchOpts) {
     } finally {
       setLoading(false);
     }
-  }, [key, status, opts.country, opts.language, opts.category, opts.query, opts.startDate, opts.endDate]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [
+    key,
+    status,
+    opts.country,
+    opts.language,
+    opts.category,
+    opts.query,
+    opts.startDate,
+    opts.endDate,
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { if (!keyLoading) load(); }, [keyLoading, load]);
+  useEffect(() => {
+    if (!keyLoading) load();
+  }, [keyLoading, load]);
 
   return { data, loading: loading || keyLoading, error, status: effectiveStatus, reload: load };
 }
@@ -105,7 +131,9 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
   let key = getEnvApiKey();
   if (!key) {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         const { data } = await supabase
           .from("user_api_keys")
@@ -115,7 +143,9 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
           .maybeSingle();
         key = data?.api_key ?? null;
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
     if (!key && typeof window !== "undefined") {
       key = localStorage.getItem("currentsApiKey");
     }
@@ -131,7 +161,9 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
   try {
     const { articles, hasKey } = await fetchNewsServer({ data: opts });
     if (hasKey) return articles.length ? articles : filterMock(opts);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return filterMock(opts);
 }
 
