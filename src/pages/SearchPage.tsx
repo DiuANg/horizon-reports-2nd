@@ -12,7 +12,9 @@ export function SearchPage() {
   const [country, setCountry] = useState<string | undefined>();
   const [language, setLanguage] = useState<string | undefined>();
   const [category, setCategory] = useState<string | undefined>();
-  const { data, loading } = useNewsApi({ query, country, language, category });
+  const [startDate, setStartDate] = useState<string | undefined>();
+  const [endDate, setEndDate] = useState<string | undefined>();
+  const { data, loading } = useNewsApi({ query, country, language, category, startDate, endDate });
   const bm = useBookmarks();
 
   const submit = (e: FormEvent) => {
