@@ -15,7 +15,9 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
   const [country, setCountry] = useState<string | undefined>(initialCountry);
   const [language, setLanguage] = useState<string | undefined>(initialLanguage ?? "en");
   const [category, setCategory] = useState<string | undefined>(initialCategory);
-  const { data, loading, status, error } = useNewsApi({ country, language, category });
+  const [startDate, setStartDate] = useState<string | undefined>();
+  const [endDate, setEndDate] = useState<string | undefined>();
+  const { data, loading, status, error } = useNewsApi({ country, language, category, startDate, endDate });
   const bm = useBookmarks();
 
   return (
@@ -27,7 +29,12 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
             {status === "mock" ? "Showing demo data — add a Currents API key in Settings for live news." : "Latest headlines from around the world."}
           </p>
         </div>
-        <FilterBar country={country} language={language} category={category} onCountry={setCountry} onLanguage={setLanguage} onCategory={setCategory} />
+        <FilterBar
+          country={country} language={language} category={category}
+          startDate={startDate} endDate={endDate}
+          onCountry={setCountry} onLanguage={setLanguage} onCategory={setCategory}
+          onStartDate={setStartDate} onEndDate={setEndDate}
+        />
       </div>
       {error && <p className="text-sm text-destructive mb-4">{error}</p>}
       {loading ? (

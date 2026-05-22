@@ -7,11 +7,14 @@ interface FetchOpts {
   language?: string;
   category?: string;
   query?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
-const ALLOWED_COUNTRY = /^[A-Za-z]{2}$/;
+const ALLOWED_COUNTRY = /^[A-Za-z]{2,4}$/;
 const ALLOWED_LANGUAGE = /^[A-Za-z]{2}$/;
 const ALLOWED_CATEGORY = /^[a-zA-Z_-]{1,32}$/;
+const ALLOWED_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function mapItems(json: any, country?: string): NewsArticle[] {
   const items = (json?.news ?? []) as Array<{
@@ -33,6 +36,18 @@ function mapItems(json: any, country?: string): NewsArticle[] {
   }));
 }
 
+function validateDate(s: string, field: string): string {
+  if (!ALLOWED_DATE.test(s)) throw new Error(`Invalid ${field}`);
+  const d = new Date(`${s}T00:00:00Z`);
+  if (isNaN(d.getTime())) throw new Error(`Invalid ${field}`);
+  const now = new Date();
+  const minDate = new Date();
+  minDate.setUTCDate(minDate.getUTCDate() - 31);
+  if (d.getTime() > now.getTime() + 24 * 60 * 60 * 1000) throw new Error(`${field} cannot be in the future`);
+  if (d.getTime() < minDate.getTime()) throw new Error(`${field} cannot be older than 1 month`);
+  return s;
+}
+
 function validate(input: FetchOpts): FetchOpts {
   const out: FetchOpts = {};
   if (input.country) {
@@ -51,6 +66,11 @@ function validate(input: FetchOpts): FetchOpts {
     if (typeof input.query !== "string" || input.query.length > 200) throw new Error("Invalid query");
     out.query = input.query;
   }
+  if (input.startDate) out.startDate = validateDate(input.startDate, "startDate");
+  if (input.endDate) out.endDate = validateDate(input.endDate, "endDate");
+  if (out.startDate && out.endDate && out.endDate < out.startDate) {
+    throw new Error("endDate must be on or after startDate");
+  }
   return out;
 }
 
@@ -64,6 +84,8 @@ export const fetchNewsServer = createServerFn({ method: "POST" })
     if (data.country) params.set("country", data.country);
     if (data.language) params.set("language", data.language);
     if (data.category) params.set("category", data.category);
+    if (data.startDate) params.set("start_date", `${data.startDate}T00:00:00+00:00`);
+    if (data.endDate) params.set("end_date", `${data.endDate}T23:59:59+00:00`);
     const endpoint = data.query
       ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(data.query)}&${params}`
       : `https://api.currentsapi.services/v1/latest-news?${params}`;
