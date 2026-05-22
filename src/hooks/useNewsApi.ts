@@ -110,16 +110,7 @@ export function useNewsApi(opts: FetchOpts) {
     } finally {
       setLoading(false);
     }
-  }, [
-    key,
-    status,
-    country,
-    language,
-    category,
-    query,
-    startDate,
-    endDate,
-  ]);
+  }, [key, status, country, language, category, query, startDate, endDate]);
 
   useEffect(() => {
     if (!keyLoading) load();
