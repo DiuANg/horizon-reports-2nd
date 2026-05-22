@@ -46,7 +46,7 @@ async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArti
   if (opts.endDate) params.set("end_date", endOfDayUtc(opts.endDate));
   const hasDates = !!(opts.startDate || opts.endDate);
   const useSearch = !!opts.query || hasDates;
-  if (useSearch) params.set("keywords", opts.query?.trim() || "*");
+  if (useSearch) params.set("keywords", opts.query?.trim() || "news");
   const endpoint = useSearch
     ? `https://api.currentsapi.services/v2/search?${params}`
     : `https://api.currentsapi.services/v2/latest-news?${params}`;
