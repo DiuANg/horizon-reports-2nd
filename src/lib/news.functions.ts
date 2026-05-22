@@ -69,8 +69,12 @@ function validateDate(s: string, field: string): string {
   const now = new Date();
   const minDate = new Date();
   minDate.setUTCDate(minDate.getUTCDate() - 16);
-  if (d.getTime() > now.getTime() + 24 * 60 * 60 * 1000) throw new Error(`${field} cannot be in the future`);
-  if (d.getTime() < minDate.getTime()) throw new Error(`${field} cannot be older than 15 days`);
+  if (d.getTime() > now.getTime() + 24 * 60 * 60 * 1000) {
+    throw new Error(`${field} cannot be in the future`);
+  }
+  if (d.getTime() < minDate.getTime()) {
+    throw new Error(`${field} cannot be older than 15 days`);
+  }
   return s;
 }
 
