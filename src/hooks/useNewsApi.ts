@@ -17,18 +17,27 @@ interface FetchOpts {
   endDate?: string;
 }
 
+function startOfDayUtc(date: string): string {
+  return `${date}T00:00:00.000+00:00`;
+}
+
+function endOfDayUtc(date: string): string {
+  return `${date}T23:59:59.000+00:00`;
+}
+
 async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArticle[]> {
   const params = new URLSearchParams();
   if (opts.country) params.set("country", opts.country);
   if (opts.language) params.set("language", opts.language);
   if (opts.category) params.set("category", opts.category);
-  if (opts.startDate) params.set("start_date", `${opts.startDate}T00:00:00+00:00`);
-  if (opts.endDate) params.set("end_date", `${opts.endDate}T23:59:59+00:00`);
+  if (opts.startDate) params.set("start_date", startOfDayUtc(opts.startDate));
+  if (opts.endDate) params.set("end_date", endOfDayUtc(opts.endDate));
   const hasDates = !!(opts.startDate || opts.endDate);
   const useSearch = !!opts.query || hasDates;
+  if (useSearch) params.set("keywords", opts.query?.trim() || "*");
   const endpoint = useSearch
-    ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(opts.query ?? "*")}&${params}`
-    : `https://api.currentsapi.services/v1/latest-news?${params}`;
+    ? `https://api.currentsapi.services/v2/search?${params}`
+    : `https://api.currentsapi.services/v2/latest-news?${params}`;
   const res = await fetch(endpoint, { headers: { Authorization: key } });
   if (!res.ok) throw new Error(`Currents API error ${res.status}`);
   const json = await res.json();
