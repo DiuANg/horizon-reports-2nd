@@ -41,9 +41,9 @@ function validateDate(s: string, field: string): string {
   if (isNaN(d.getTime())) throw new Error(`Invalid ${field}`);
   const now = new Date();
   const minDate = new Date();
-  minDate.setUTCDate(minDate.getUTCDate() - 31);
+  minDate.setUTCDate(minDate.getUTCDate() - 16);
   if (d.getTime() > now.getTime() + 24 * 60 * 60 * 1000) throw new Error(`${field} cannot be in the future`);
-  if (d.getTime() < minDate.getTime()) throw new Error(`${field} cannot be older than 1 month`);
+  if (d.getTime() < minDate.getTime()) throw new Error(`${field} cannot be older than 15 days`);
   return s;
 }
 
@@ -67,8 +67,10 @@ function validate(input: FetchOpts): FetchOpts {
   }
   if (input.startDate) out.startDate = validateDate(input.startDate, "startDate");
   if (input.endDate) out.endDate = validateDate(input.endDate, "endDate");
-  if (out.startDate && out.endDate && out.endDate < out.startDate) {
-    throw new Error("endDate must be on or after startDate");
+  if (out.startDate && out.endDate) {
+    if (out.endDate < out.startDate) throw new Error("endDate must be on or after startDate");
+    const days = (new Date(out.endDate).getTime() - new Date(out.startDate).getTime()) / 86400000;
+    if (days > 15) throw new Error("Date range cannot exceed 15 days");
   }
   return out;
 }
