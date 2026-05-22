@@ -74,7 +74,6 @@ function validate(input: FetchOpts): FetchOpts {
 }
 
 export const fetchNewsServer = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((input: FetchOpts) => validate(input))
   .handler(async ({ data }) => {
     const key = process.env.CURRENTS_API_KEY;
