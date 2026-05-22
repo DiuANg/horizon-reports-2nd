@@ -15,6 +15,22 @@ const ALLOWED_LANGUAGE = /^[A-Za-z]{2}$/;
 const ALLOWED_CATEGORY = /^[a-zA-Z_-]{1,32}$/;
 const ALLOWED_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+interface CurrentsNewsItem {
+  id: string;
+  title: string;
+  description?: string;
+  url: string;
+  author?: string;
+  image?: string | null;
+  language?: string;
+  category?: string[];
+  published: string;
+}
+
+interface CurrentsResponse {
+  news?: CurrentsNewsItem[];
+}
+
 function startOfDayUtc(date: string): string {
   return `${date}T00:00:00.000+00:00`;
 }
@@ -23,11 +39,8 @@ function endOfDayUtc(date: string): string {
   return `${date}T23:59:59.000+00:00`;
 }
 
-function mapItems(json: any, country?: string): NewsArticle[] {
-  const items = (json?.news ?? []) as Array<{
-    id: string; title: string; description?: string; url: string; author?: string;
-    image?: string | null; language?: string; category?: string[]; published: string;
-  }>;
+function mapItems(json: CurrentsResponse, country?: string): NewsArticle[] {
+  const items = json.news ?? [];
   return items.map((n) => ({
     id: n.id,
     title: n.title,
@@ -38,7 +51,13 @@ function mapItems(json: any, country?: string): NewsArticle[] {
     language: n.language,
     category: n.category,
     published: n.published,
-    source: (() => { try { return new URL(n.url).hostname.replace(/^www\./, ""); } catch { return n.author ?? "Unknown"; } })(),
+    source: (() => {
+      try {
+        return new URL(n.url).hostname.replace(/^www\./, "");
+      } catch {
+        return n.author ?? "Unknown";
+      }
+    })(),
     country,
   }));
 }
@@ -70,13 +89,17 @@ function validate(input: FetchOpts): FetchOpts {
     out.category = input.category;
   }
   if (input.query) {
-    if (typeof input.query !== "string" || input.query.length > 200) throw new Error("Invalid query");
+    if (typeof input.query !== "string" || input.query.length > 200) {
+      throw new Error("Invalid query");
+    }
     out.query = input.query;
   }
   if (input.startDate) out.startDate = validateDate(input.startDate, "startDate");
   if (input.endDate) out.endDate = validateDate(input.endDate, "endDate");
   if (out.startDate && out.endDate) {
-    if (out.endDate < out.startDate) throw new Error("endDate must be on or after startDate");
+    if (out.endDate < out.startDate) {
+      throw new Error("endDate must be on or after startDate");
+    }
     const days = (new Date(out.endDate).getTime() - new Date(out.startDate).getTime()) / 86400000;
     if (days > 15) throw new Error("Date range cannot exceed 15 days");
   }
@@ -102,7 +125,10 @@ export const fetchNewsServer = createServerFn({ method: "POST" })
       : `https://api.currentsapi.services/v2/latest-news?${params}`;
     const res = await fetch(endpoint, { headers: { Authorization: key } });
     if (!res.ok) {
-      console.error("Currents API request failed", { status: res.status, body: await res.text() });
+      console.error("Currents API request failed", {
+        status: res.status,
+        body: await res.text(),
+      });
       return { articles: [] as NewsArticle[], hasKey: true };
     }
     const json = await res.json();
