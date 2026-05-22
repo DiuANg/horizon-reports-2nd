@@ -41,9 +41,9 @@ function validateDate(s: string, field: string): string {
   if (isNaN(d.getTime())) throw new Error(`Invalid ${field}`);
   const now = new Date();
   const minDate = new Date();
-  minDate.setUTCDate(minDate.getUTCDate() - 31);
+  minDate.setUTCDate(minDate.getUTCDate() - 16);
   if (d.getTime() > now.getTime() + 24 * 60 * 60 * 1000) throw new Error(`${field} cannot be in the future`);
-  if (d.getTime() < minDate.getTime()) throw new Error(`${field} cannot be older than 1 month`);
+  if (d.getTime() < minDate.getTime()) throw new Error(`${field} cannot be older than 15 days`);
   return s;
 }
 
@@ -67,8 +67,10 @@ function validate(input: FetchOpts): FetchOpts {
   }
   if (input.startDate) out.startDate = validateDate(input.startDate, "startDate");
   if (input.endDate) out.endDate = validateDate(input.endDate, "endDate");
-  if (out.startDate && out.endDate && out.endDate < out.startDate) {
-    throw new Error("endDate must be on or after startDate");
+  if (out.startDate && out.endDate) {
+    if (out.endDate < out.startDate) throw new Error("endDate must be on or after startDate");
+    const days = (new Date(out.endDate).getTime() - new Date(out.startDate).getTime()) / 86400000;
+    if (days > 15) throw new Error("Date range cannot exceed 15 days");
   }
   return out;
 }
@@ -84,8 +86,10 @@ export const fetchNewsServer = createServerFn({ method: "POST" })
     if (data.category) params.set("category", data.category);
     if (data.startDate) params.set("start_date", `${data.startDate}T00:00:00+00:00`);
     if (data.endDate) params.set("end_date", `${data.endDate}T23:59:59+00:00`);
-    const endpoint = data.query
-      ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(data.query)}&${params}`
+    const hasDates = !!(data.startDate || data.endDate);
+    const useSearch = !!data.query || hasDates;
+    const endpoint = useSearch
+      ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(data.query ?? "*")}&${params}`
       : `https://api.currentsapi.services/v1/latest-news?${params}`;
     const res = await fetch(endpoint, { headers: { Authorization: key } });
     if (!res.ok) throw new Error(`Currents API error ${res.status}`);
