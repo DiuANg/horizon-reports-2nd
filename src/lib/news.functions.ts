@@ -84,8 +84,10 @@ export const fetchNewsServer = createServerFn({ method: "POST" })
     if (data.category) params.set("category", data.category);
     if (data.startDate) params.set("start_date", `${data.startDate}T00:00:00+00:00`);
     if (data.endDate) params.set("end_date", `${data.endDate}T23:59:59+00:00`);
-    const endpoint = data.query
-      ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(data.query)}&${params}`
+    const hasDates = !!(data.startDate || data.endDate);
+    const useSearch = !!data.query || hasDates;
+    const endpoint = useSearch
+      ? `https://api.currentsapi.services/v1/search?keywords=${encodeURIComponent(data.query ?? "*")}&${params}`
       : `https://api.currentsapi.services/v1/latest-news?${params}`;
     const res = await fetch(endpoint, { headers: { Authorization: key } });
     if (!res.ok) throw new Error(`Currents API error ${res.status}`);
