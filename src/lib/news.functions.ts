@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { NewsArticle } from "@/types/news";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 interface FetchOpts {
   country?: string;
@@ -111,6 +112,7 @@ function validate(input: FetchOpts): FetchOpts {
 }
 
 export const fetchNewsServer = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: FetchOpts) => validate(input))
   .handler(async ({ data }) => {
     const key = process.env.CURRENTS_API_KEY;
