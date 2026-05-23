@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { filterMock } from "@/data/mockNews";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { filterMock, filterMockPage } from "@/data/mockNews";
 import type { NewsArticle } from "@/types/news";
 import { useApiKey, getEnvApiKey } from "@/hooks/useApiKey";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,13 +37,14 @@ function endOfDayUtc(date: string): string {
   return `${date}T23:59:59.000+00:00`;
 }
 
-async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArticle[]> {
+async function fetchFromCurrents(key: string, opts: FetchOpts & { page?: number }): Promise<NewsArticle[]> {
   const params = new URLSearchParams();
   if (opts.country) params.set("country", opts.country);
   if (opts.language) params.set("language", opts.language);
   if (opts.category) params.set("category", opts.category);
   if (opts.startDate) params.set("start_date", startOfDayUtc(opts.startDate));
   if (opts.endDate) params.set("end_date", endOfDayUtc(opts.endDate));
+  if (opts.page && opts.page > 1) params.set("page_number", String(opts.page));
   const hasDates = !!(opts.startDate || opts.endDate);
   const useSearch = !!opts.query || hasDates;
   if (useSearch) params.set("keywords", opts.query?.trim() || "news");
@@ -75,54 +76,123 @@ async function fetchFromCurrents(key: string, opts: FetchOpts): Promise<NewsArti
   }));
 }
 
+function dedupe(existing: NewsArticle[], incoming: NewsArticle[]): NewsArticle[] {
+  const seen = new Set(existing.map((a) => a.id));
+  return [...existing, ...incoming.filter((a) => !seen.has(a.id))];
+}
+
 export function useNewsApi(opts: FetchOpts) {
   const { country, language, category, query, startDate, endDate } = opts;
   const { key, status, loading: keyLoading } = useApiKey();
   const [data, setData] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [effectiveStatus, setEffectiveStatus] = useState(status);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  // Track the current request so out-of-order responses don't clobber state.
+  const reqIdRef = useRef(0);
 
-  const load = useCallback(async () => {
-    const requestOpts = { country, language, category, query, startDate, endDate };
-    setLoading(true);
-    setError(null);
-    try {
-      if (key) {
-        const res = await fetchFromCurrents(key, requestOpts);
-        setData(res.length ? res : filterMock(requestOpts));
-        setEffectiveStatus(status);
-      } else {
-        // Server fn requires auth; only call when signed in.
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          setData(filterMock(requestOpts));
-          setEffectiveStatus("mock");
-        } else {
-          const { articles, hasKey } = await fetchNewsServer({ data: requestOpts });
-          if (hasKey) {
-            setData(articles.length ? articles : filterMock(requestOpts));
-            setEffectiveStatus("env");
+  const fetchPage = useCallback(
+    async (pageNum: number, append: boolean) => {
+      const requestOpts = { country, language, category, query, startDate, endDate, page: pageNum };
+      const myReq = ++reqIdRef.current;
+      if (append) setLoadingMore(true);
+      else setLoading(true);
+      setError(null);
+      try {
+        if (key) {
+          const res = await fetchFromCurrents(key, requestOpts);
+          if (myReq !== reqIdRef.current) return;
+          if (res.length === 0 && !append) {
+            const mock = filterMockPage({ country, language, category, query, page: pageNum });
+            setData(mock.articles);
+            setHasMore(mock.hasMore);
           } else {
-            setData(filterMock(requestOpts));
+            setData((prev) => (append ? dedupe(prev, res) : res));
+            setHasMore(res.length >= 20);
+          }
+          setEffectiveStatus(status);
+        } else {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (myReq !== reqIdRef.current) return;
+          if (!session) {
+            const mock = filterMockPage({ country, language, category, query, page: pageNum });
+            setData((prev) => (append ? dedupe(prev, mock.articles) : mock.articles));
+            setHasMore(mock.hasMore);
             setEffectiveStatus("mock");
+          } else {
+            const { articles, hasKey, hasMore: more } = await fetchNewsServer({ data: requestOpts });
+            if (myReq !== reqIdRef.current) return;
+            if (hasKey) {
+              if (articles.length === 0 && !append) {
+                const mock = filterMockPage({ country, language, category, query, page: pageNum });
+                setData(mock.articles);
+                setHasMore(mock.hasMore);
+              } else {
+                setData((prev) => (append ? dedupe(prev, articles) : articles));
+                setHasMore(more);
+              }
+              setEffectiveStatus("env");
+            } else {
+              const mock = filterMockPage({ country, language, category, query, page: pageNum });
+              setData((prev) => (append ? dedupe(prev, mock.articles) : mock.articles));
+              setHasMore(mock.hasMore);
+              setEffectiveStatus("mock");
+            }
           }
         }
+      } catch (e) {
+        if (myReq !== reqIdRef.current) return;
+        console.error("News fetch failed:", e);
+        setError("Unable to load news right now. Showing demo data instead.");
+        if (!append) {
+          const mock = filterMockPage({ country, language, category, query, page: pageNum });
+          setData(mock.articles);
+          setHasMore(mock.hasMore);
+        } else {
+          setHasMore(false);
+        }
+      } finally {
+        if (myReq === reqIdRef.current) {
+          setLoading(false);
+          setLoadingMore(false);
+        }
       }
-    } catch (e) {
-      console.error("News fetch failed:", e);
-      setError("Unable to load news right now. Showing demo data instead.");
-      setData(filterMock(requestOpts));
-    } finally {
-      setLoading(false);
-    }
-  }, [key, status, country, language, category, query, startDate, endDate]);
+    },
+    [key, status, country, language, category, query, startDate, endDate],
+  );
 
+  // Reset to page 1 whenever filters change.
   useEffect(() => {
-    if (!keyLoading) load();
-  }, [keyLoading, load]);
+    if (keyLoading) return;
+    setPage(1);
+    fetchPage(1, false);
+  }, [keyLoading, fetchPage]);
 
-  return { data, loading: loading || keyLoading, error, status: effectiveStatus, reload: load };
+  const loadMore = useCallback(() => {
+    if (loading || loadingMore || !hasMore) return;
+    const next = page + 1;
+    setPage(next);
+    fetchPage(next, true);
+  }, [loading, loadingMore, hasMore, page, fetchPage]);
+
+  const reload = useCallback(() => {
+    setPage(1);
+    fetchPage(1, false);
+  }, [fetchPage]);
+
+  return {
+    data,
+    loading: loading || keyLoading,
+    loadingMore,
+    error,
+    status: effectiveStatus,
+    hasMore,
+    loadMore,
+    reload,
+  };
 }
 
 /** One-off fetch (used by Globe). Reads user key first, then env via server fn. */

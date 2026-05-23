@@ -1,43 +1,50 @@
-# Add date range filter to news
+## Goal
+Add pagination with a "Load More" button to the news feed. Clicking it fetches the next page and appends articles to the existing list.
 
-## UI changes
+## Files to change
 
-**`src/components/FilterBar.tsx`**
-- Add two new optional props: `startDate`, `endDate`, `onStartDate`, `onEndDate`.
-- Render two side-by-side `<input type="date">` fields labelled "Start Date" and "End Date", styled to match the existing selects.
-- Compute `today` and `oneMonthAgo` (today − 30 days) as `YYYY-MM-DD` strings at render time.
-- Both inputs: `min={oneMonthAgo}`, `max={today}`.
-- End Date input's `min` is dynamic: `startDate || oneMonthAgo`, so it can never be before the chosen start.
-- When the user picks a Start Date later than the current End Date, clear the End Date (or push it forward) to keep the range valid.
+### 1. `src/data/mockNews.ts`
+- Add `page` and `pageSize` parameters to `filterMock`
+- Slice the filtered results based on page and pageSize (default 6 to match the grid)
+- Return `{ articles, hasMore }` so the UI knows when to hide the button
 
-**`src/pages/TopNewsPage.tsx` and `src/pages/SearchPage.tsx`**
-- Add `startDate`/`endDate` state, pass to `FilterBar` and to `useNewsApi`.
+### 2. `src/hooks/useNewsApi.ts`
+- Add `page?: number` to `FetchOpts`
+- Update `fetchFromCurrents` to append `page_number=${page ?? 1}` to the API query string
+- Update `useNewsApi` hook:
+  - Track `page` state (starts at 1)
+  - Track `loadingMore` boolean (separate from initial `loading`)
+  - Track `hasMore` boolean
+  - On filter changes, reset `page` to 1 and clear data
+  - Provide `loadMore()` that increments page, fetches, and appends unique articles (dedupe by `id`)
+  - Return `{ data, loading, loadingMore, error, status, hasMore, loadMore, reload }`
+- Update `fetchNewsOnce` to pass page through (for Globe page consistency)
 
-**`src/routes/top-news.tsx`** (and `src/routes/search.tsx` if it has searchSchema)
-- Extend the Zod search schema with optional `startDate`, `endDate` strings so the filter is shareable via URL.
+### 3. `src/lib/news.functions.ts`
+- Add `page?: number` to server-side `FetchOpts`
+- Pass `page_number` parameter to Currents API in the server handler
+- Return `{ articles, hasKey, hasMore }` from `fetchNewsServer`
+- Validate `page` is a positive integer
 
-## Data flow
+### 4. `src/pages/TopNewsPage.tsx`
+- Destructure `loadingMore`, `hasMore`, `loadMore` from `useNewsApi`
+- After the article grid, render:
+  - If `hasMore`: a centered "Load More" button with a spinner when `loadingMore` is true
+  - If no more results and data exists: a subtle "No more articles" text
+- Keep existing filter change behavior (filters reset page automatically via the hook)
 
-**`src/hooks/useNewsApi.ts`**
-- Extend `FetchOpts` with `startDate?: string; endDate?: string`.
-- Pass through to both the direct `fetchFromCurrents` client call and the `fetchNewsServer` server function.
-- Add to the `useCallback` deps.
+### 5. `src/pages/SearchPage.tsx`
+- Same "Load More" button pattern as TopNewsPage
+- Also show when the user has performed a search (query is set)
 
-**`src/lib/news.functions.ts`** (server fn)
-- Extend `FetchOpts` with `startDate`/`endDate`.
-- Validate format strictly: `/^\d{4}-\d{2}-\d{2}$/`, parseable Date, not in the future, not older than 31 days, end >= start.
-- Forward to Currents as `start_date` and `end_date` query params (Currents accepts `YYYY-MM-DDTHH:mm:ss±zz:zz`; we'll send `${startDate}T00:00:00+00:00` and `${endDate}T23:59:59+00:00`).
-- Apply on both `latest-news` and `search` endpoints.
+## Technical details
+- Page size: 6 articles per page (matches the 3-column grid layout)
+- Deduplication: when appending, filter out articles whose `id` already exists in `data`
+- The Currents API may ignore `page_number`, but the parameter is passed for compatibility if the API supports it
+- Mock data (16 items) will properly paginate: page 1 = items 0-5, page 2 = items 6-11, page 3 = items 12-15
 
-**Client `fetchFromCurrents` in `useNewsApi.ts`**
-- Same query-param additions for the direct-key path so behaviour matches the server path.
-
-## Validation summary
-
-- HTML-level: `min`/`max` on both inputs; End Date `min` re-derived from Start Date.
-- Server-level: regex + range bounds in `validate()` so the API can't be abused with arbitrary dates.
-
-## Out of scope
-
-- No design system overhaul; reuse existing input styling tokens.
-- Bookmarks/Globe pages unchanged (they don't expose FilterBar date controls).
+## Edge cases handled
+- Filter changes reset page to 1 and clear data (no stale pages)
+- Empty results on load more: set `hasMore = false`
+- Loading spinner only in the button during load-more; initial load still uses the full `LoadingGrid`
+- Both signed-in and signed-out (mock data) paths support pagination
