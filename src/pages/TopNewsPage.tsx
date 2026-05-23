@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { LogIn } from "lucide-react";
 import { FilterBar } from "@/components/FilterBar";
 import { NewsCard } from "@/components/NewsCard";
 import { LoadingGrid } from "@/components/LoadingState";
 import { useNewsApi } from "@/hooks/useNewsApi";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   initialCountry?: string;
