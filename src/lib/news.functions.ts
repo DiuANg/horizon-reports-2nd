@@ -9,12 +9,14 @@ interface FetchOpts {
   query?: string;
   startDate?: string;
   endDate?: string;
+  page?: number;
 }
 
 const ALLOWED_COUNTRY = /^[A-Za-z]{2,4}$/;
 const ALLOWED_LANGUAGE = /^[A-Za-z]{2}$/;
 const ALLOWED_CATEGORY = /^[a-zA-Z_-]{1,32}$/;
 const ALLOWED_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const MAX_PAGE = 100;
 
 interface CurrentsNewsItem {
   id: string;
@@ -108,6 +110,12 @@ function validate(input: FetchOpts): FetchOpts {
     const days = (new Date(out.endDate).getTime() - new Date(out.startDate).getTime()) / 86400000;
     if (days > 15) throw new Error("Date range cannot exceed 15 days");
   }
+  if (input.page !== undefined) {
+    if (!Number.isInteger(input.page) || input.page < 1 || input.page > MAX_PAGE) {
+      throw new Error("Invalid page");
+    }
+    out.page = input.page;
+  }
   return out;
 }
 
@@ -116,13 +124,14 @@ export const fetchNewsServer = createServerFn({ method: "POST" })
   .inputValidator((input: FetchOpts) => validate(input))
   .handler(async ({ data }) => {
     const key = process.env.CURRENTS_API_KEY;
-    if (!key) return { articles: [] as NewsArticle[], hasKey: false };
+    if (!key) return { articles: [] as NewsArticle[], hasKey: false, hasMore: false };
     const params = new URLSearchParams();
     if (data.country) params.set("country", data.country);
     if (data.language) params.set("language", data.language);
     if (data.category) params.set("category", data.category);
     if (data.startDate) params.set("start_date", startOfDayUtc(data.startDate));
     if (data.endDate) params.set("end_date", endOfDayUtc(data.endDate));
+    if (data.page && data.page > 1) params.set("page_number", String(data.page));
     const hasDates = !!(data.startDate || data.endDate);
     const useSearch = !!data.query || hasDates;
     if (useSearch) params.set("keywords", data.query?.trim() || "news");
@@ -135,8 +144,11 @@ export const fetchNewsServer = createServerFn({ method: "POST" })
         status: res.status,
         body: await res.text(),
       });
-      return { articles: [] as NewsArticle[], hasKey: true };
+      return { articles: [] as NewsArticle[], hasKey: true, hasMore: false };
     }
     const json = await res.json();
-    return { articles: mapItems(json, data.country), hasKey: true };
+    const articles = mapItems(json, data.country);
+    // If the API returned a full-ish page, assume more exists.
+    const hasMore = articles.length >= 20;
+    return { articles, hasKey: true, hasMore };
   });

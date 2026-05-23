@@ -22,7 +22,16 @@ export const MOCK_NEWS: NewsArticle[] = [
   { id: "16", title: "Türkiye'de yeni altyapı projeleri açıklandı", source: "Hürriyet", country: "TR", language: "tr", category: ["business"], published: hoursAgo(16), url: "https://example.com/16", image: null },
 ];
 
-export function filterMock({ country, language, category, query }: { country?: string; language?: string; category?: string; query?: string }): NewsArticle[] {
+interface MockFilterOpts {
+  country?: string;
+  language?: string;
+  category?: string;
+  query?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+function filterAll({ country, language, category, query }: MockFilterOpts): NewsArticle[] {
   return MOCK_NEWS.filter((a) => {
     if (country && a.country !== country) return false;
     if (language && a.language !== language) return false;
@@ -34,4 +43,19 @@ export function filterMock({ country, language, category, query }: { country?: s
     }
     return true;
   });
+}
+
+/** Backwards-compatible: returns articles for the requested page (default page 1, size 6). */
+export function filterMock(opts: MockFilterOpts): NewsArticle[] {
+  return filterMockPage(opts).articles;
+}
+
+export function filterMockPage(opts: MockFilterOpts): { articles: NewsArticle[]; hasMore: boolean; total: number } {
+  const all = filterAll(opts);
+  const page = Math.max(1, opts.page ?? 1);
+  const pageSize = opts.pageSize ?? 6;
+  const start = (page - 1) * pageSize;
+  const end = start + pageSize;
+  const slice = all.slice(start, end);
+  return { articles: slice, hasMore: end < all.length, total: all.length };
 }

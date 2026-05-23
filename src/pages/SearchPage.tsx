@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
-import { Search as SearchIcon } from "lucide-react";
+import { Search as SearchIcon, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { FilterBar } from "@/components/FilterBar";
 import { NewsCard } from "@/components/NewsCard";
 import { LoadingGrid } from "@/components/LoadingState";
@@ -14,7 +15,7 @@ export function SearchPage() {
   const [category, setCategory] = useState<string | undefined>();
   const [startDate, setStartDate] = useState<string | undefined>();
   const [endDate, setEndDate] = useState<string | undefined>();
-  const { data, loading } = useNewsApi({ query, country, language, category, startDate, endDate });
+  const { data, loading, loadingMore, hasMore, loadMore } = useNewsApi({ query, country, language, category, startDate, endDate });
   const bm = useBookmarks();
 
   const submit = (e: FormEvent) => {
@@ -63,16 +64,34 @@ export function SearchPage() {
       ) : data.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground">No results found for "{query}".</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {data.map((a) => (
-            <NewsCard
-              key={a.id}
-              article={a}
-              bookmarked={bm.isBookmarked(a.url)}
-              onToggleBookmark={() => bm.toggle(a)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {data.map((a) => (
+              <NewsCard
+                key={a.id}
+                article={a}
+                bookmarked={bm.isBookmarked(a.url)}
+                onToggleBookmark={() => bm.toggle(a)}
+              />
+            ))}
+          </div>
+          <div className="flex justify-center mt-8">
+            {hasMore ? (
+              <Button onClick={loadMore} disabled={loadingMore} variant="outline" size="lg">
+                {loadingMore ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading…
+                  </>
+                ) : (
+                  "Load More"
+                )}
+              </Button>
+            ) : (
+              <p className="text-xs text-muted-foreground">You've reached the end.</p>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
