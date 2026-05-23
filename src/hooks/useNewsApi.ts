@@ -93,14 +93,20 @@ export function useNewsApi(opts: FetchOpts) {
         setData(res.length ? res : filterMock(requestOpts));
         setEffectiveStatus(status);
       } else {
-        // Fall back to server-side env CURRENTS_API_KEY
-        const { articles, hasKey } = await fetchNewsServer({ data: requestOpts });
-        if (hasKey) {
-          setData(articles.length ? articles : filterMock(requestOpts));
-          setEffectiveStatus("env");
-        } else {
+        // Server fn requires auth; only call when signed in.
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
           setData(filterMock(requestOpts));
           setEffectiveStatus("mock");
+        } else {
+          const { articles, hasKey } = await fetchNewsServer({ data: requestOpts });
+          if (hasKey) {
+            setData(articles.length ? articles : filterMock(requestOpts));
+            setEffectiveStatus("env");
+          } else {
+            setData(filterMock(requestOpts));
+            setEffectiveStatus("mock");
+          }
         }
       }
     } catch (e) {
