@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { LogIn } from "lucide-react";
+import { LogIn, Loader2 } from "lucide-react";
 import { FilterBar } from "@/components/FilterBar";
 import { NewsCard } from "@/components/NewsCard";
 import { LoadingGrid } from "@/components/LoadingState";
@@ -21,7 +21,7 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
   const [category, setCategory] = useState<string | undefined>(initialCategory);
   const [startDate, setStartDate] = useState<string | undefined>();
   const [endDate, setEndDate] = useState<string | undefined>();
-  const { data, loading, status, error } = useNewsApi({ country, language, category, startDate, endDate });
+  const { data, loading, loadingMore, hasMore, loadMore, status, error } = useNewsApi({ country, language, category, startDate, endDate });
   const bm = useBookmarks();
   const { user, loading: authLoading } = useAuth();
   const showSignInPrompt = !authLoading && !user && status === "mock";
@@ -66,16 +66,34 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
       ) : data.length === 0 ? (
         <div className="text-center py-20 text-muted-foreground">No articles match your filters.</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {data.map((a) => (
-            <NewsCard
-              key={a.id}
-              article={a}
-              bookmarked={bm.isBookmarked(a.url)}
-              onToggleBookmark={() => bm.toggle(a)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {data.map((a) => (
+              <NewsCard
+                key={a.id}
+                article={a}
+                bookmarked={bm.isBookmarked(a.url)}
+                onToggleBookmark={() => bm.toggle(a)}
+              />
+            ))}
+          </div>
+          <div className="flex justify-center mt-8">
+            {hasMore ? (
+              <Button onClick={loadMore} disabled={loadingMore} variant="outline" size="lg">
+                {loadingMore ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading…
+                  </>
+                ) : (
+                  "Load More"
+                )}
+              </Button>
+            ) : (
+              <p className="text-xs text-muted-foreground">You've reached the end.</p>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
