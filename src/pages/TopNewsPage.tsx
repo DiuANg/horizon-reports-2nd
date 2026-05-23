@@ -23,6 +23,8 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
   const [endDate, setEndDate] = useState<string | undefined>();
   const { data, loading, status, error } = useNewsApi({ country, language, category, startDate, endDate });
   const bm = useBookmarks();
+  const { user, loading: authLoading } = useAuth();
+  const showSignInPrompt = !authLoading && !user && status === "mock";
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
@@ -30,7 +32,11 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">Top News</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {status === "mock" ? "Showing demo data — add a Currents API key in Settings for live news." : "Latest headlines from around the world."}
+            {showSignInPrompt
+              ? "You're browsing as a guest — showing demo data. Sign in to access live news."
+              : status === "mock"
+              ? "Showing demo data."
+              : "Latest headlines from around the world."}
           </p>
         </div>
         <FilterBar
@@ -40,6 +46,20 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
           onStartDate={setStartDate} onEndDate={setEndDate}
         />
       </div>
+      {showSignInPrompt && (
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
+          <div className="flex items-start gap-3">
+            <LogIn className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-medium">Sign in to view live news</p>
+              <p className="text-xs text-muted-foreground">Guests only see demo data. Sign in to fetch real-time articles.</p>
+            </div>
+          </div>
+          <Button asChild size="sm">
+            <Link to="/auth">Sign in</Link>
+          </Button>
+        </div>
+      )}
       {error && <p className="text-sm text-destructive mb-4">{error}</p>}
       {loading ? (
         <LoadingGrid />
