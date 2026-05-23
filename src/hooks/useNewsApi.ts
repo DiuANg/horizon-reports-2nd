@@ -158,8 +158,11 @@ export async function fetchNewsOnce(opts: FetchOpts): Promise<NewsArticle[]> {
     }
   }
   try {
-    const { articles, hasKey } = await fetchNewsServer({ data: opts });
-    if (hasKey) return articles.length ? articles : filterMock(opts);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      const { articles, hasKey } = await fetchNewsServer({ data: opts });
+      if (hasKey) return articles.length ? articles : filterMock(opts);
+    }
   } catch {
     /* ignore */
   }
