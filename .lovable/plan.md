@@ -1,50 +1,41 @@
-## Goal
-Add pagination with a "Load More" button to the news feed. Clicking it fetches the next page and appends articles to the existing list.
+# Add i18n (English + Vietnamese) with react-i18next
 
-## Files to change
+## Setup
+- Install: `react-i18next`, `i18next`, `i18next-browser-languagedetector`
+- Create `src/i18n/index.ts` — initialize i18next with `en` and `vi` resources, language detector (localStorage + navigator), fallback `en`, `react: { useSuspense: false }` (safe for SSR/prerender)
+- Import the config once in `src/router.tsx` (or `src/start.ts` client side) so it loads before components render
 
-### 1. `src/data/mockNews.ts`
-- Add `page` and `pageSize` parameters to `filterMock`
-- Slice the filtered results based on page and pageSize (default 6 to match the grid)
-- Return `{ articles, hasMore }` so the UI knows when to hide the button
+## Translation dictionaries
+Create `src/i18n/locales/en.json` and `src/i18n/locales/vi.json` with namespaced keys:
 
-### 2. `src/hooks/useNewsApi.ts`
-- Add `page?: number` to `FetchOpts`
-- Update `fetchFromCurrents` to append `page_number=${page ?? 1}` to the API query string
-- Update `useNewsApi` hook:
-  - Track `page` state (starts at 1)
-  - Track `loadingMore` boolean (separate from initial `loading`)
-  - Track `hasMore` boolean
-  - On filter changes, reset `page` to 1 and clear data
-  - Provide `loadMore()` that increments page, fetches, and appends unique articles (dedupe by `id`)
-  - Return `{ data, loading, loadingMore, error, status, hasMore, loadMore, reload }`
-- Update `fetchNewsOnce` to pass page through (for Globe page consistency)
+```
+nav.globe, nav.topNews, nav.search, nav.bookmarks, nav.settings
+auth.signIn, auth.signOut, auth.signInToViewLive, auth.guestsOnlyDemo
+common.loadMore, common.loading, common.reachedEnd, common.search
+filters.allCountries, filters.allLanguages, filters.allCategories,
+filters.startDate, filters.endDate
+topNews.title, topNews.subtitleGuest, topNews.subtitleMock, topNews.subtitleLive,
+topNews.noMatch
+search.title, search.subtitle, search.placeholder, search.empty, search.noResults
+language.label, language.english, language.vietnamese
+```
 
-### 3. `src/lib/news.functions.ts`
-- Add `page?: number` to server-side `FetchOpts`
-- Pass `page_number` parameter to Currents API in the server handler
-- Return `{ articles, hasKey, hasMore }` from `fetchNewsServer`
-- Validate `page` is a positive integer
+Vietnamese translations provided for every key.
 
-### 4. `src/pages/TopNewsPage.tsx`
-- Destructure `loadingMore`, `hasMore`, `loadMore` from `useNewsApi`
-- After the article grid, render:
-  - If `hasMore`: a centered "Load More" button with a spinner when `loadingMore` is true
-  - If no more results and data exists: a subtle "No more articles" text
-- Keep existing filter change behavior (filters reset page automatically via the hook)
+## Component updates (replace hardcoded strings with `t()`)
+- `src/components/Sidebar.tsx` — nav labels, "World News" brand kept as-is
+- `src/components/UserMenu.tsx` — "Sign in", sign-out aria
+- `src/components/FilterBar.tsx` — select placeholders, date labels
+- `src/pages/TopNewsPage.tsx` — title, subtitles, sign-in banner, load more, empty state
+- `src/pages/SearchPage.tsx` — title, subtitle, placeholder, button, empty/no-results, load more
+- `src/pages/BookmarksPage.tsx` — visible strings (read file first)
+- `src/pages/SettingsPage.tsx` — visible strings (read file first)
 
-### 5. `src/pages/SearchPage.tsx`
-- Same "Load More" button pattern as TopNewsPage
-- Also show when the user has performed a search (query is set)
+## Language switcher
+- New component `src/components/LanguageSwitcher.tsx` — shadcn `DropdownMenu` trigger with `Languages` lucide icon + current language code (EN/VI). Options call `i18n.changeLanguage()` and persist via detector's localStorage cache.
+- Place it in `src/components/Sidebar.tsx` footer next to `UserMenu` (compact, icon-led to fit the 60px sidebar width on desktop and the mobile menu).
 
-## Technical details
-- Page size: 6 articles per page (matches the 3-column grid layout)
-- Deduplication: when appending, filter out articles whose `id` already exists in `data`
-- The Currents API may ignore `page_number`, but the parameter is passed for compatibility if the API supports it
-- Mock data (16 items) will properly paginate: page 1 = items 0-5, page 2 = items 6-11, page 3 = items 12-15
-
-## Edge cases handled
-- Filter changes reset page to 1 and clear data (no stale pages)
-- Empty results on load more: set `hasMore = false`
-- Loading spinner only in the button during load-more; initial load still uses the full `LoadingGrid`
-- Both signed-in and signed-out (mock data) paths support pagination
+## Notes
+- No business-logic changes; UI/presentation only.
+- Default language: detected, fallback English.
+- Keep API/data values untranslated (article content comes from the API).
