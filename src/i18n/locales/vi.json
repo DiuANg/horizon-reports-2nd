@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "globe": "Quả cầu",
+    "topNews": "Tin nổi bật",
+    "search": "Tìm kiếm",
+    "bookmarks": "Đã lưu",
+    "settings": "Cài đặt"
+  },
+  "auth": {
+    "signIn": "Đăng nhập",
+    "signOut": "Đăng xuất",
+    "signInRequired": "Yêu cầu đăng nhập",
+    "signInToManage": "Đăng nhập để xem và quản lý các bài viết đã lưu trên mọi thiết bị.",
+    "signInToViewLive": "Đăng nhập để xem tin tức trực tiếp",
+    "guestsOnlyDemo": "Khách chỉ thấy dữ liệu mẫu. Đăng nhập để nhận tin theo thời gian thực.",
+    "signInToSaveSettings": "để lưu khóa API và các bài viết vào tài khoản của bạn."
+  },
+  "common": {
+    "loadMore": "Tải thêm",
+    "loading": "Đang tải…",
+    "reachedEnd": "Bạn đã xem hết.",
+    "search": "Tìm"
+  },
+  "filters": {
+    "allCountries": "Tất cả quốc gia",
+    "allLanguages": "Tất cả ngôn ngữ",
+    "allCategories": "Tất cả danh mục",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày kết thúc"
+  },
+  "topNews": {
+    "title": "Tin nổi bật",
+    "subtitleGuest": "Bạn đang xem với tư cách khách — đang hiển thị dữ liệu mẫu. Đăng nhập để xem tin trực tiếp.",
+    "subtitleMock": "Đang hiển thị dữ liệu mẫu.",
+    "subtitleLive": "Tin tức mới nhất từ khắp thế giới.",
+    "noMatch": "Không có bài viết nào phù hợp với bộ lọc."
+  },
+  "search": {
+    "title": "Tìm tin tức",
+    "subtitle": "Tìm bài viết theo quốc gia và ngôn ngữ.",
+    "placeholder": "Nhập từ khóa...",
+    "empty": "Nhập từ khóa để bắt đầu tìm kiếm.",
+    "noResults": "Không tìm thấy kết quả cho \"{{query}}\"."
+  },
+  "bookmarks": {
+    "title": "Đã lưu",
+    "savedCount": "{{count}} bài đã lưu",
+    "empty": "Chưa có bài nào được lưu. Lưu bài từ quả cầu, tin nổi bật hoặc tìm kiếm."
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "subtitle": "Cấu hình nguồn tin và quản lý các bài đã lưu.",
+    "apiKey": "Khóa API",
+    "apiKeyPlaceholder": "Dán khóa API Currents của bạn",
+    "saveKey": "Lưu khóa",
+    "clearSavedKey": "Xóa khóa đã lưu",
+    "currentKey": "Hiện tại",
+    "statusEnv": "Đang dùng (biến môi trường)",
+    "statusRemote": "Đang dùng (tài khoản của bạn)",
+    "statusLocal": "Đang dùng (thiết bị này)",
+    "statusNone": "(nên dùng khóa API trả phí từ Currents để có trải nghiệm tốt hơn)",
+    "savedCount": "{{count}} đã lưu",
+    "exportJson": "Xuất JSON",
+    "clearAll": "Xóa tất cả",
+    "confirmClearAll": "Xóa toàn bộ bài đã lưu? Hành động này không thể hoàn tác.",
+    "about": "Giới thiệu"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "english": "English",
+    "vietnamese": "Tiếng Việt"
+  }
+}

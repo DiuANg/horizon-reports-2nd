@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { LogIn, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { FilterBar } from "@/components/FilterBar";
 import { NewsCard } from "@/components/NewsCard";
 import { LoadingGrid } from "@/components/LoadingState";
@@ -24,19 +25,20 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
   const { data, loading, loadingMore, hasMore, loadMore, status, error } = useNewsApi({ country, language, category, startDate, endDate });
   const bm = useBookmarks();
   const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
   const showSignInPrompt = !authLoading && !user && status === "mock";
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Top News</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">{t("topNews.title")}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {showSignInPrompt
-              ? "You're browsing as a guest — showing demo data. Sign in to access live news."
+              ? t("topNews.subtitleGuest")
               : status === "mock"
-              ? "Showing demo data."
-              : "Latest headlines from around the world."}
+              ? t("topNews.subtitleMock")
+              : t("topNews.subtitleLive")}
           </p>
         </div>
         <FilterBar
@@ -51,12 +53,12 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
           <div className="flex items-start gap-3">
             <LogIn className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium">Sign in to view live news</p>
-              <p className="text-xs text-muted-foreground">Guests only see demo data. Sign in to fetch real-time articles.</p>
+              <p className="text-sm font-medium">{t("auth.signInToViewLive")}</p>
+              <p className="text-xs text-muted-foreground">{t("auth.guestsOnlyDemo")}</p>
             </div>
           </div>
           <Button asChild size="sm">
-            <Link to="/auth">Sign in</Link>
+            <Link to="/auth">{t("auth.signIn")}</Link>
           </Button>
         </div>
       )}
@@ -64,7 +66,7 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
       {loading ? (
         <LoadingGrid />
       ) : data.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">No articles match your filters.</div>
+        <div className="text-center py-20 text-muted-foreground">{t("topNews.noMatch")}</div>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -83,14 +85,14 @@ export function TopNewsPage({ initialCountry, initialLanguage, initialCategory }
                 {loadingMore ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading…
+                    {t("common.loading")}
                   </>
                 ) : (
-                  "Load More"
+                  t("common.loadMore")
                 )}
               </Button>
             ) : (
-              <p className="text-xs text-muted-foreground">You've reached the end.</p>
+              <p className="text-xs text-muted-foreground">{t("common.reachedEnd")}</p>
             )}
           </div>
         </>

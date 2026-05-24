@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Search as SearchIcon, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { FilterBar } from "@/components/FilterBar";
 import { NewsCard } from "@/components/NewsCard";
@@ -17,6 +18,7 @@ export function SearchPage() {
   const [endDate, setEndDate] = useState<string | undefined>();
   const { data, loading, loadingMore, hasMore, loadMore } = useNewsApi({ query, country, language, category, startDate, endDate });
   const bm = useBookmarks();
+  const { t } = useTranslation();
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -25,8 +27,8 @@ export function SearchPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
-      <h1 className="text-2xl md:text-3xl font-bold mb-1">Search News</h1>
-      <p className="text-sm text-muted-foreground mb-6">Find articles across countries and languages.</p>
+      <h1 className="text-2xl md:text-3xl font-bold mb-1">{t("search.title")}</h1>
+      <p className="text-sm text-muted-foreground mb-6">{t("search.subtitle")}</p>
 
       <form onSubmit={submit} className="flex gap-2 mb-4">
         <div className="relative flex-1">
@@ -34,7 +36,7 @@ export function SearchPage() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Search keywords..."
+            placeholder={t("search.placeholder")}
             className="w-full bg-surface border border-border rounded-lg pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
         </div>
@@ -42,7 +44,7 @@ export function SearchPage() {
           type="submit"
           className="px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
         >
-          Search
+          {t("common.search")}
         </button>
       </form>
       <div className="mb-6">
@@ -57,12 +59,12 @@ export function SearchPage() {
       {!query ? (
         <div className="text-center py-20 text-muted-foreground">
           <SearchIcon className="w-10 h-10 mx-auto mb-3 opacity-40" />
-          <p>Enter a keyword to start searching.</p>
+          <p>{t("search.empty")}</p>
         </div>
       ) : loading ? (
         <LoadingGrid />
       ) : data.length === 0 ? (
-        <div className="text-center py-20 text-muted-foreground">No results found for "{query}".</div>
+        <div className="text-center py-20 text-muted-foreground">{t("search.noResults", { query })}</div>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -81,14 +83,14 @@ export function SearchPage() {
                 {loadingMore ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading…
+                    {t("common.loading")}
                   </>
                 ) : (
-                  "Load More"
+                  t("common.loadMore")
                 )}
               </Button>
             ) : (
-              <p className="text-xs text-muted-foreground">You've reached the end.</p>
+              <p className="text-xs text-muted-foreground">{t("common.reachedEnd")}</p>
             )}
           </div>
         </>

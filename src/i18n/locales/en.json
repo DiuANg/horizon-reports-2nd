@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "globe": "Globe",
+    "topNews": "Top News",
+    "search": "Search",
+    "bookmarks": "Bookmarks",
+    "settings": "Settings"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signInRequired": "Sign in required",
+    "signInToManage": "Sign in to view and manage your bookmarks across devices.",
+    "signInToViewLive": "Sign in to view live news",
+    "guestsOnlyDemo": "Guests only see demo data. Sign in to fetch real-time articles.",
+    "signInToSaveSettings": "to save your API key and bookmarks to your account."
+  },
+  "common": {
+    "loadMore": "Load More",
+    "loading": "Loading…",
+    "reachedEnd": "You've reached the end.",
+    "search": "Search"
+  },
+  "filters": {
+    "allCountries": "All countries",
+    "allLanguages": "All languages",
+    "allCategories": "All categories",
+    "startDate": "Start Date",
+    "endDate": "End Date"
+  },
+  "topNews": {
+    "title": "Top News",
+    "subtitleGuest": "You're browsing as a guest — showing demo data. Sign in to access live news.",
+    "subtitleMock": "Showing demo data.",
+    "subtitleLive": "Latest headlines from around the world.",
+    "noMatch": "No articles match your filters."
+  },
+  "search": {
+    "title": "Search News",
+    "subtitle": "Find articles across countries and languages.",
+    "placeholder": "Search keywords...",
+    "empty": "Enter a keyword to start searching.",
+    "noResults": "No results found for \"{{query}}\"."
+  },
+  "bookmarks": {
+    "title": "Bookmarks",
+    "savedCount": "{{count}} saved articles",
+    "empty": "No bookmarks yet. Save articles from the globe, top news, or search."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Configure your news data source and manage bookmarks.",
+    "apiKey": "API Key",
+    "apiKeyPlaceholder": "Paste your Currents API key",
+    "saveKey": "Save Key",
+    "clearSavedKey": "Clear saved key",
+    "currentKey": "Current",
+    "statusEnv": "Active (env var)",
+    "statusRemote": "Active (your account)",
+    "statusLocal": "Active (this device)",
+    "statusNone": "(consider using paid API key from Currents for better experience)",
+    "savedCount": "{{count}} saved",
+    "exportJson": "Export JSON",
+    "clearAll": "Clear All",
+    "confirmClearAll": "Delete all bookmarks? This cannot be undone.",
+    "about": "About"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "vietnamese": "Tiếng Việt"
+  }
+}
