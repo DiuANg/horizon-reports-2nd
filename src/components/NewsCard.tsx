@@ -2,6 +2,7 @@ import { Bookmark, ExternalLink, Trash2 } from "lucide-react";
 import type { NewsArticle } from "@/types/news";
 import { timeAgo } from "@/utils/timeAgo";
 import { truncate } from "@/utils/truncateText";
+import { safeArticleUrl } from "@/utils/safeUrl";
 
 interface Props {
   article: NewsArticle;
