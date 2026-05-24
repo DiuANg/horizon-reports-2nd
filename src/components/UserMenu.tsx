@@ -1,10 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { LogOut, User as UserIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
+  const { t } = useTranslation();
 
   if (!user) {
     return (
@@ -12,7 +14,7 @@ export function UserMenu() {
         to="/auth"
         className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
       >
-        <UserIcon className="w-4 h-4" /> Sign in
+        <UserIcon className="w-4 h-4" /> {t("auth.signIn")}
       </Link>
     );
   }
@@ -33,7 +35,7 @@ export function UserMenu() {
       </div>
       <button
         onClick={signOut}
-        aria-label="Sign out"
+        aria-label={t("auth.signOut")}
         className="p-1.5 rounded-md text-muted-foreground hover:bg-secondary hover:text-destructive transition-colors"
       >
         <LogOut className="w-4 h-4" />

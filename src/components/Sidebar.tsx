@@ -1,19 +1,22 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Globe2, Newspaper, Search, Settings, Bookmark, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { UserMenu } from "@/components/UserMenu";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 const NAV = [
-  { to: "/", label: "Globe", icon: Globe2 },
-  { to: "/top-news", label: "Top News", icon: Newspaper },
-  { to: "/search", label: "Search", icon: Search },
-  { to: "/bookmarks", label: "Bookmarks", icon: Bookmark },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/", labelKey: "nav.globe", icon: Globe2 },
+  { to: "/top-news", labelKey: "nav.topNews", icon: Newspaper },
+  { to: "/search", labelKey: "nav.search", icon: Search },
+  { to: "/bookmarks", labelKey: "nav.bookmarks", icon: Bookmark },
+  { to: "/settings", labelKey: "nav.settings", icon: Settings },
 ] as const;
 
 export function Sidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <>
@@ -41,7 +44,7 @@ export function Sidebar() {
           <Globe2 className="w-5 h-5" /> World News
         </div>
         <nav className="flex flex-col gap-1 p-3 flex-1">
-          {NAV.map(({ to, label, icon: Icon }) => {
+          {NAV.map(({ to, labelKey, icon: Icon }) => {
             const active = pathname === to;
             return (
               <Link
@@ -55,12 +58,13 @@ export function Sidebar() {
                 }`}
               >
                 <Icon className="w-4 h-4" />
-                {label}
+                {t(labelKey)}
               </Link>
             );
           })}
         </nav>
-        <div className="border-t border-border p-2">
+        <div className="border-t border-border p-2 space-y-1">
+          <LanguageSwitcher />
           <UserMenu />
         </div>
       </aside>
