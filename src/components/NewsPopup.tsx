@@ -4,6 +4,7 @@ import type { NewsArticle } from "@/types/news";
 import { flagFor } from "@/utils/countryCodes";
 import { timeAgo } from "@/utils/timeAgo";
 import { Spinner } from "./LoadingState";
+import { safeArticleUrl } from "@/utils/safeUrl";
 
 interface Props {
   country: { code: string; name: string };
