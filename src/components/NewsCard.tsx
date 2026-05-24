@@ -2,6 +2,7 @@ import { Bookmark, ExternalLink, Trash2 } from "lucide-react";
 import type { NewsArticle } from "@/types/news";
 import { timeAgo } from "@/utils/timeAgo";
 import { truncate } from "@/utils/truncateText";
+import { safeArticleUrl } from "@/utils/safeUrl";
 
 interface Props {
   article: NewsArticle;
@@ -58,7 +59,7 @@ export function NewsCard({ article, bookmarked, onToggleBookmark, onDelete }: Pr
         )}
         <div className="mt-auto flex items-center justify-between">
           <a
-            href={article.url}
+            href={safeArticleUrl(article.url)}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"

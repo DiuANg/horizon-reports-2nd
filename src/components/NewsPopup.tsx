@@ -4,6 +4,7 @@ import type { NewsArticle } from "@/types/news";
 import { flagFor } from "@/utils/countryCodes";
 import { timeAgo } from "@/utils/timeAgo";
 import { Spinner } from "./LoadingState";
+import { safeArticleUrl } from "@/utils/safeUrl";
 
 interface Props {
   country: { code: string; name: string };
@@ -50,7 +51,7 @@ export function NewsPopup({ country, articles, loading, isBookmarked, onToggleBo
                           <span>{timeAgo(a.published)}</span>
                         </div>
                         <a
-                          href={a.url}
+                          href={safeArticleUrl(a.url)}
                           target="_blank"
                           rel="noreferrer"
                           className="text-sm font-medium leading-snug hover:text-primary inline-flex items-start gap-1"
