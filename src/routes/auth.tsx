@@ -33,23 +33,26 @@ function AuthPage() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  // Move Supabase session from localStorage to sessionStorage when "remember me" is off,
-  // so the session is cleared when the browser/tab closes.
-  const applyRememberPreference = () => {
+  // Clear the persisted Supabase session on tab close when "Remember me" is off.
+  // We keep the token in localStorage (where the Supabase client looks for it),
+  // and only purge it on `pagehide` so the in-flight session keeps working.
+  useEffect(() => {
     if (remember || typeof window === "undefined") return;
-    try {
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const k = localStorage.key(i);
-        if (k && k.startsWith("sb-") && k.endsWith("-auth-token")) {
-          const v = localStorage.getItem(k);
-          if (v) sessionStorage.setItem(k, v);
-          localStorage.removeItem(k);
+    const purge = () => {
+      try {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith("sb-") && k.endsWith("-auth-token")) {
+            localStorage.removeItem(k);
+          }
         }
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
-    }
-  };
+    };
+    window.addEventListener("pagehide", purge);
+    return () => window.removeEventListener("pagehide", purge);
+  }, [remember]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,13 +69,11 @@ function AuthPage() {
           setSignupSent(email);
           toast.success("Check your email to confirm your account");
         } else {
-          applyRememberPreference();
           toast.success("Account created");
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        applyRememberPreference();
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Auth failed");
