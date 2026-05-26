@@ -26,7 +26,7 @@ export function Sidebar() {
           <Globe2 className="w-5 h-5" /> World News
         </div>
         <button
-          aria-label="Toggle menu"
+          aria-label={t("nav.toggleMenu")}
           onClick={() => setOpen((o) => !o)}
           className="p-2 rounded-md hover:bg-secondary transition-colors"
         >

@@ -104,8 +104,8 @@ export function GlobePage() {
     <div className="relative h-[calc(100vh-3.5rem)] md:h-screen flex flex-col">
       <div className="flex items-center justify-between p-4 border-b border-border bg-surface/60 backdrop-blur-md z-10">
         <div>
-          <h1 className="text-lg font-semibold">Interactive Globe</h1>
-          <p className="text-xs text-muted-foreground">Click any country to read its latest headlines</p>
+          <h1 className="text-lg font-semibold">{t("globe.title")}</h1>
+          <p className="text-xs text-muted-foreground">{t("globe.subtitle")}</p>
         </div>
         <FilterBar
           country={filterCountry}
