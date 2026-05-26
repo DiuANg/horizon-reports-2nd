@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Globe from "react-globe.gl";
 import type { GlobeMethods } from "react-globe.gl";
+import { useTranslation } from "react-i18next";
 import { FilterBar } from "@/components/FilterBar";
 import { NewsPopup } from "@/components/NewsPopup";
 import { fetchNewsOnce } from "@/hooks/useNewsApi";
@@ -55,6 +56,7 @@ export function GlobePage() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(false);
   const bm = useBookmarks();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadCountries().then(setFeatures).catch(() => setFeatures([]));
