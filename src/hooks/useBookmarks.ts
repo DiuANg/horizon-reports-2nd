@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import type { NewsArticle } from "@/types/news";
@@ -17,6 +18,7 @@ export interface Bookmark {
 
 export function useBookmarks() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const userId = user?.id;
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +44,7 @@ export function useBookmarks() {
 
   const requireAuth = () => {
     if (!userId) {
-      toast.error("Sign in to save bookmarks");
+      toast.error(t("bookmarks.toastSignInToSave"));
       return false;
     }
     return true;

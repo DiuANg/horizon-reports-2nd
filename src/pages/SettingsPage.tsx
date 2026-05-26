@@ -20,15 +20,15 @@ export function SettingsPage() {
   const { t } = useTranslation();
 
   const onSave = async () => {
-    if (!input.trim()) { toast.error("Please enter an API key"); return; }
+    if (!input.trim()) { toast.error(t("settings.toastEnterKey")); return; }
     await save(input);
     setInput("");
-    toast.success(user ? "API key saved to your account" : "API key saved on this device");
+    toast.success(user ? t("settings.toastSavedAccount") : t("settings.toastSavedDevice"));
   };
 
   const onClear = async () => {
     await clear();
-    toast.success("Saved key cleared");
+    toast.success(t("settings.toastKeyCleared"));
   };
 
   const exportJson = () => {
@@ -104,7 +104,7 @@ export function SettingsPage() {
             onClick={() => {
               if (confirm(t("settings.confirmClearAll"))) {
                 bm.clearAll();
-                toast.success("All bookmarks deleted");
+                toast.success(t("settings.toastAllDeleted"));
               }
             }}
             className="px-3 py-1.5 rounded-md border border-border text-sm hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors"
@@ -120,9 +120,9 @@ export function SettingsPage() {
           <h2 className="font-semibold">{t("settings.about")}</h2>
         </div>
         <ul className="text-sm space-y-1.5">
-          <li><a href="https://currentsapi.services/en/docs" target="_blank" rel="noreferrer" className="text-primary hover:underline">Currents API docs</a></li>
-          <li><a href="https://currentsapi.services" target="_blank" rel="noreferrer" className="text-primary hover:underline">Sign up for a free API key</a></li>
-          <li className="text-muted-foreground text-xs pt-2">World News Dashboard · v1.0</li>
+          <li><a href="https://currentsapi.services/en/docs" target="_blank" rel="noreferrer" className="text-primary hover:underline">{t("settings.aboutDocs")}</a></li>
+          <li><a href="https://currentsapi.services" target="_blank" rel="noreferrer" className="text-primary hover:underline">{t("settings.aboutSignup")}</a></li>
+          <li className="text-muted-foreground text-xs pt-2">{t("settings.aboutVersion")}</li>
         </ul>
       </section>
     </div>
