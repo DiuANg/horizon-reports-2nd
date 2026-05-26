@@ -4,7 +4,8 @@
     "topNews": "Tin nổi bật",
     "search": "Tìm kiếm",
     "bookmarks": "Đã lưu",
-    "settings": "Cài đặt"
+    "settings": "Cài đặt",
+    "toggleMenu": "Bật/tắt menu"
   },
   "auth": {
     "signIn": "Đăng nhập",
@@ -13,13 +14,29 @@
     "signInToManage": "Đăng nhập để xem và quản lý các bài viết đã lưu trên mọi thiết bị.",
     "signInToViewLive": "Đăng nhập để xem tin tức trực tiếp",
     "guestsOnlyDemo": "Khách chỉ thấy dữ liệu mẫu. Đăng nhập để nhận tin theo thời gian thực.",
-    "signInToSaveSettings": "để lưu khóa API và các bài viết vào tài khoản của bạn."
+    "signInToSaveSettings": "để lưu khóa API và các bài viết vào tài khoản của bạn.",
+    "tabSignIn": "Đăng nhập",
+    "tabSignUp": "Đăng ký",
+    "emailPlaceholder": "ban@vidu.com",
+    "passwordPlaceholder": "Mật khẩu",
+    "rememberMe": "Ghi nhớ tôi",
+    "pleaseWait": "Vui lòng đợi…",
+    "createAccount": "Tạo tài khoản",
+    "backToGlobe": "Về quả cầu",
+    "checkEmailConfirm": "Kiểm tra email ({{email}}) để xác nhận tài khoản trước khi đăng nhập.",
+    "toastCheckEmail": "Kiểm tra email để xác nhận tài khoản của bạn",
+    "toastAccountCreated": "Đã tạo tài khoản",
+    "toastAuthFailed": "Đăng nhập thất bại"
   },
   "common": {
     "loadMore": "Tải thêm",
     "loading": "Đang tải…",
     "reachedEnd": "Bạn đã xem hết.",
-    "search": "Tìm"
+    "search": "Tìm",
+    "read": "Đọc",
+    "remove": "Xóa",
+    "tryAgain": "Thử lại",
+    "close": "Đóng"
   },
   "filters": {
     "allCountries": "Tất cả quốc gia",
@@ -45,7 +62,26 @@
   "bookmarks": {
     "title": "Đã lưu",
     "savedCount": "{{count}} bài đã lưu",
-    "empty": "Chưa có bài nào được lưu. Lưu bài từ quả cầu, tin nổi bật hoặc tìm kiếm."
+    "empty": "Chưa có bài nào được lưu. Lưu bài từ quả cầu, tin nổi bật hoặc tìm kiếm.",
+    "toastSignInToSave": "Đăng nhập để lưu bài viết",
+    "addBookmark": "Thêm vào đã lưu",
+    "removeBookmark": "Xóa khỏi đã lưu"
+  },
+  "globe": {
+    "title": "Quả cầu tương tác",
+    "subtitle": "Nhấp vào quốc gia bất kỳ để đọc tin mới nhất",
+    "loading": "Đang tải quả cầu...",
+    "fetchingHeadlines": "Đang tải tiêu đề...",
+    "noArticles": "Không có bài viết mới cho quốc gia này.",
+    "viewAllFrom": "Xem tất cả từ {{country}} →"
+  },
+  "notFound": {
+    "title": "Không tìm thấy trang",
+    "description": "Trang bạn đang tìm không tồn tại."
+  },
+  "errorBoundary": {
+    "title": "Đã xảy ra lỗi",
+    "description": "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại."
   },
   "settings": {
     "title": "Cài đặt",
@@ -63,7 +99,15 @@
     "exportJson": "Xuất JSON",
     "clearAll": "Xóa tất cả",
     "confirmClearAll": "Xóa toàn bộ bài đã lưu? Hành động này không thể hoàn tác.",
-    "about": "Giới thiệu"
+    "about": "Giới thiệu",
+    "aboutDocs": "Tài liệu Currents API",
+    "aboutSignup": "Đăng ký khóa API miễn phí",
+    "aboutVersion": "World News Dashboard · v1.0",
+    "toastEnterKey": "Vui lòng nhập khóa API",
+    "toastSavedAccount": "Đã lưu khóa API vào tài khoản",
+    "toastSavedDevice": "Đã lưu khóa API trên thiết bị này",
+    "toastKeyCleared": "Đã xóa khóa đã lưu",
+    "toastAllDeleted": "Đã xóa toàn bộ bài lưu"
   },
   "language": {
     "label": "Ngôn ngữ",

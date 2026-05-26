@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Globe from "react-globe.gl";
 import type { GlobeMethods } from "react-globe.gl";
+import { useTranslation } from "react-i18next";
 import { FilterBar } from "@/components/FilterBar";
 import { NewsPopup } from "@/components/NewsPopup";
 import { fetchNewsOnce } from "@/hooks/useNewsApi";
@@ -55,6 +56,7 @@ export function GlobePage() {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(false);
   const bm = useBookmarks();
+  const { t } = useTranslation();
 
   useEffect(() => {
     loadCountries().then(setFeatures).catch(() => setFeatures([]));
@@ -104,8 +106,8 @@ export function GlobePage() {
     <div className="relative h-[calc(100vh-3.5rem)] md:h-screen flex flex-col">
       <div className="flex items-center justify-between p-4 border-b border-border bg-surface/60 backdrop-blur-md z-10">
         <div>
-          <h1 className="text-lg font-semibold">Interactive Globe</h1>
-          <p className="text-xs text-muted-foreground">Click any country to read its latest headlines</p>
+          <h1 className="text-lg font-semibold">{t("globe.title")}</h1>
+          <p className="text-xs text-muted-foreground">{t("globe.subtitle")}</p>
         </div>
         <FilterBar
           country={filterCountry}

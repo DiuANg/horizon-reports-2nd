@@ -4,7 +4,8 @@
     "topNews": "Top News",
     "search": "Search",
     "bookmarks": "Bookmarks",
-    "settings": "Settings"
+    "settings": "Settings",
+    "toggleMenu": "Toggle menu"
   },
   "auth": {
     "signIn": "Sign in",
@@ -13,13 +14,29 @@
     "signInToManage": "Sign in to view and manage your bookmarks across devices.",
     "signInToViewLive": "Sign in to view live news",
     "guestsOnlyDemo": "Guests only see demo data. Sign in to fetch real-time articles.",
-    "signInToSaveSettings": "to save your API key and bookmarks to your account."
+    "signInToSaveSettings": "to save your API key and bookmarks to your account.",
+    "tabSignIn": "Sign in",
+    "tabSignUp": "Sign up",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "Password",
+    "rememberMe": "Remember me",
+    "pleaseWait": "Please wait…",
+    "createAccount": "Create account",
+    "backToGlobe": "Back to globe",
+    "checkEmailConfirm": "Check your email ({{email}}) to confirm your account before signing in.",
+    "toastCheckEmail": "Check your email to confirm your account",
+    "toastAccountCreated": "Account created",
+    "toastAuthFailed": "Auth failed"
   },
   "common": {
     "loadMore": "Load More",
     "loading": "Loading…",
     "reachedEnd": "You've reached the end.",
-    "search": "Search"
+    "search": "Search",
+    "read": "Read",
+    "remove": "Remove",
+    "tryAgain": "Try again",
+    "close": "Close"
   },
   "filters": {
     "allCountries": "All countries",
@@ -45,7 +62,26 @@
   "bookmarks": {
     "title": "Bookmarks",
     "savedCount": "{{count}} saved articles",
-    "empty": "No bookmarks yet. Save articles from the globe, top news, or search."
+    "empty": "No bookmarks yet. Save articles from the globe, top news, or search.",
+    "toastSignInToSave": "Sign in to save bookmarks",
+    "addBookmark": "Add bookmark",
+    "removeBookmark": "Remove bookmark"
+  },
+  "globe": {
+    "title": "Interactive Globe",
+    "subtitle": "Click any country to read its latest headlines",
+    "loading": "Loading globe...",
+    "fetchingHeadlines": "Fetching headlines...",
+    "noArticles": "No recent articles for this country.",
+    "viewAllFrom": "View all from {{country}} →"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you're looking for doesn't exist."
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again."
   },
   "settings": {
     "title": "Settings",
@@ -63,7 +99,15 @@
     "exportJson": "Export JSON",
     "clearAll": "Clear All",
     "confirmClearAll": "Delete all bookmarks? This cannot be undone.",
-    "about": "About"
+    "about": "About",
+    "aboutDocs": "Currents API docs",
+    "aboutSignup": "Sign up for a free API key",
+    "aboutVersion": "World News Dashboard · v1.0",
+    "toastEnterKey": "Please enter an API key",
+    "toastSavedAccount": "API key saved to your account",
+    "toastSavedDevice": "API key saved on this device",
+    "toastKeyCleared": "Saved key cleared",
+    "toastAllDeleted": "All bookmarks deleted"
   },
   "language": {
     "label": "Language",

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Spinner } from "@/components/LoadingState";
 
 export const Route = createFileRoute("/")({
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [mounted, setMounted] = useState(false);
   const [Comp, setComp] = useState<React.ComponentType | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     setMounted(true);
@@ -24,7 +26,7 @@ function Index() {
   if (!mounted || !Comp) {
     return (
       <div className="h-screen flex items-center justify-center">
-        <Spinner label="Loading globe..." />
+        <Spinner label={t("globe.loading")} />
       </div>
     );
   }

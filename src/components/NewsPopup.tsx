@@ -1,5 +1,6 @@
 import { Bookmark, ExternalLink, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import type { NewsArticle } from "@/types/news";
 import { flagFor } from "@/utils/countryCodes";
 import { timeAgo } from "@/utils/timeAgo";
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export function NewsPopup({ country, articles, loading, isBookmarked, onToggleBookmark, onClose }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none p-4">
       <div className="pointer-events-auto w-full max-w-md bg-card/90 backdrop-blur-xl border border-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
@@ -26,7 +28,7 @@ export function NewsPopup({ country, articles, loading, isBookmarked, onToggleBo
           </div>
           <button
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="p-1.5 rounded-md hover:bg-secondary transition-colors"
           >
             <X className="w-4 h-4" />
@@ -34,9 +36,9 @@ export function NewsPopup({ country, articles, loading, isBookmarked, onToggleBo
         </div>
         <div className="max-h-[60vh] overflow-y-auto">
           {loading ? (
-            <Spinner label="Fetching headlines..." />
+            <Spinner label={t("globe.fetchingHeadlines")} />
           ) : articles.length === 0 ? (
-            <p className="p-6 text-center text-sm text-muted-foreground">No recent articles for this country.</p>
+            <p className="p-6 text-center text-sm text-muted-foreground">{t("globe.noArticles")}</p>
           ) : (
             <ul className="divide-y divide-border">
               {articles.slice(0, 5).map((a) => {
@@ -62,7 +64,7 @@ export function NewsPopup({ country, articles, loading, isBookmarked, onToggleBo
                       </div>
                       <button
                         onClick={() => onToggleBookmark(a)}
-                        aria-label="Bookmark"
+                        aria-label={marked ? t("bookmarks.removeBookmark") : t("bookmarks.addBookmark")}
                         className={`p-1.5 rounded-md transition-colors ${
                           marked ? "text-primary" : "text-muted-foreground hover:text-foreground"
                         }`}
@@ -82,7 +84,7 @@ export function NewsPopup({ country, articles, loading, isBookmarked, onToggleBo
             search={{ country: country.code }}
             className="text-sm text-primary hover:underline"
           >
-            View all from {country.name} →
+            {t("globe.viewAllFrom", { country: country.name })}
           </Link>
         </div>
       </div>
